@@ -7,7 +7,7 @@ type finiteAutomata struct {
 	transitionGraph graph
 }
 
-func (f *finiteAutomata) initialize(input transitionLabel) {
+func (f *finiteAutomata) init(input transitionLabel) {
 	f.start = 0
 	f.final = 1
 	f.current = 0

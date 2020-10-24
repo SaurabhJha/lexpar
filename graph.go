@@ -1,5 +1,19 @@
 package main
 
+type stack []byte
+
+func (s *stack) push(b byte) {
+	(*s) = append(*s, b)
+}
+
+func (s *stack) pop() {
+	*s = (*s)[:len(*s)-1]
+}
+
+func (s *stack) empty() bool {
+	return len(*s) == 0
+}
+
 type state uint
 type transitionLabel string
 
