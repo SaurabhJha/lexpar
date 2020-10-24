@@ -86,15 +86,15 @@ func (r regularExpression) getSecondOperand() regularExpression {
 	return regularExpression(r[secondOperandIndex:])
 }
 
-func (r regularExpression) compile() finiteAutomata {
+func (r regularExpression) compile() nondeterministicFiniteAutomata {
 	if len(r) == 0 {
-		var f finiteAutomata
+		var f nondeterministicFiniteAutomata
 		f.init("")
 		return f
 	}
 
 	if len(r) == 1 {
-		var f finiteAutomata
+		var f nondeterministicFiniteAutomata
 		f.init(transitionLabel(r[0]))
 		return f
 	}

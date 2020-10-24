@@ -5,6 +5,7 @@ import "fmt"
 func main() {
 	for {
 		regex := readRegexFromStdio()
-		fmt.Println(regex.compile())
+		automata := regex.compile()
+		fmt.Println(automata.convertToDfa())
 	}
 }
