@@ -17,16 +17,6 @@ func main() {
 		automataTable[label] = dfa
 	}
 	for {
-		i := readFromStdio()
-		var maxMatchedPrefix string
-		var maxLabel string
-		for l, a := range automataTable {
-			matched := matchPrefix(a, i)
-			if len(matched) > len(maxMatchedPrefix) {
-				maxMatchedPrefix = matched
-				maxLabel = l
-			}
-		}
-		fmt.Println(maxLabel, maxMatchedPrefix)
+		fmt.Println(tokenize(automataTable, readFromStdio()))
 	}
 }
