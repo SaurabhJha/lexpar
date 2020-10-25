@@ -1,4 +1,4 @@
-package main
+package lexer
 
 type nondeterministicFiniteAutomata struct {
 	start           state
