@@ -129,6 +129,8 @@ type deterministicFiniteAutomata struct {
 	final           setOfStates
 	current         state
 	transitionGraph deterministicGraph
+	dead            bool
+	accepted        bool
 }
 
 func (n *nondeterministicFiniteAutomata) convertToDfa() deterministicFiniteAutomata {
@@ -164,4 +166,23 @@ func (n *nondeterministicFiniteAutomata) convertToDfa() deterministicFiniteAutom
 	dfa.current = dfa.start
 	dfa.transitionGraph = dfaGraph
 	return *dfa
+}
+
+func (d *deterministicFiniteAutomata) move(input transitionLabel) {
+	nextState, ok := d.transitionGraph[d.current][input]
+	if !ok {
+		d.dead = true
+		d.accepted = false
+		return
+	}
+	d.current = nextState
+	if d.final.has(d.current) {
+		d.accepted = true
+	}
+}
+
+func (d *deterministicFiniteAutomata) reset() {
+	d.dead = false
+	d.accepted = false
+	d.current = d.start
 }

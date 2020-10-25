@@ -58,6 +58,9 @@ func (r regularExpression) trimParenthesis() regularExpression {
 	if r[0] != '(' {
 		return r
 	}
+	if r[len(r)-1] != ')' {
+		return r
+	}
 	return r[1 : len(r)-1]
 }
 
