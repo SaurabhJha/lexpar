@@ -24,3 +24,23 @@ func (ss *setOfSymbols) hasSubset(os *setOfSymbols) bool {
 func (ss *setOfSymbols) isEqualTo(os *setOfSymbols) bool {
 	return ss.hasSubset(os) && os.hasSubset(ss)
 }
+
+func (ss *setOfSymbols) has(s grammarSymbol) bool {
+	return (*ss)[s]
+}
+
+type queueOfItems []lrItem
+
+func (q *queueOfItems) enqueue(l lrItem) {
+	*q = append(*q, l)
+}
+
+func (q *queueOfItems) dequeue() lrItem {
+	front := (*q)[0]
+	(*q) = (*q)[1:]
+	return front
+}
+
+func (q *queueOfItems) empty() bool {
+	return len(*q) == 0
+}
