@@ -39,6 +39,10 @@ func (r regularExpression) isValid() bool {
 }
 
 func (r regularExpression) getMatchingParenIndex() int {
+	if r[0] != '(' {
+		return -1
+	}
+
 	s := make(stack, 0, 10)
 	for i, character := range r {
 		switch character {

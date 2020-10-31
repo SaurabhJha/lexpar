@@ -16,16 +16,6 @@ func loadRegexFromDisk() map[string]regularExpression {
 	return regexTable
 }
 
-func compileRegex(r map[string]regularExpression) map[string]deterministicFiniteAutomata {
-	automataTable := make(map[string]deterministicFiniteAutomata)
-	for label, regex := range r {
-		nfa := regex.compile()
-		dfa := nfa.convertToDfa()
-		automataTable[label] = dfa
-	}
-	return automataTable
-}
-
 func readFromStdio() string {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(">> ")

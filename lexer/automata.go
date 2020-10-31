@@ -169,6 +169,10 @@ func (n *nondeterministicFiniteAutomata) convertToDfa() deterministicFiniteAutom
 }
 
 func (d *deterministicFiniteAutomata) move(input transitionLabel) {
+	if d.dead {
+		return
+	}
+
 	nextState, ok := d.transitionGraph[d.current][input]
 	if !ok {
 		d.dead = true

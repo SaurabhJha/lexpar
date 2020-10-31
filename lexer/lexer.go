@@ -7,6 +7,16 @@ type token struct {
 	lexeme    string
 }
 
+func compileRegex(r map[string]regularExpression) map[string]deterministicFiniteAutomata {
+	automataTable := make(map[string]deterministicFiniteAutomata)
+	for label, regex := range r {
+		nfa := regex.compile()
+		dfa := nfa.convertToDfa()
+		automataTable[label] = dfa
+	}
+	return automataTable
+}
+
 func matchPrefix(d deterministicFiniteAutomata, s string) string {
 	matchingPrefixIndex := -1
 	for i, character := range s {
