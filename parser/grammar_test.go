@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -78,4 +79,51 @@ func TestComputeFollowSet(t *testing.T) {
 			t.Errorf("Expected computeFirstSet(%q) = %v, got %v", test.input, test.expected, got)
 		}
 	}
+}
+
+func TestGetProductionNumber(t *testing.T) {
+	var g grammar
+	g.start = "expr'"
+	g.productions = []production{
+		{"expr'", []grammarSymbol{"expr"}},
+		{"expr", []grammarSymbol{"expr", "+", "term"}},
+		{"expr", []grammarSymbol{"term"}},
+		{"term", []grammarSymbol{"term", "*", "factor"}},
+		{"term", []grammarSymbol{"factor"}},
+		{"factor", []grammarSymbol{"number"}},
+		{"factor", []grammarSymbol{"(", "expr", ")"}},
+	}
+
+	var testData = []struct {
+		input    production
+		expected int
+	}{
+		{production{"expr", []grammarSymbol{"expr", "+", "term"}}, 1},
+		{production{"term", []grammarSymbol{"term", "*", "factor"}}, 3},
+		{production{"factor", []grammarSymbol{"number"}}, 5},
+		{production{"expr", []grammarSymbol{"factor"}}, -1},
+	}
+
+	for _, test := range testData {
+		if got := g.getProductionNumber(test.input); got != test.expected {
+			t.Errorf("Expected getProductionNumber(%v) to be %v but got %v", test.input, test.expected, got)
+		}
+	}
+}
+
+func TestCompile(t *testing.T) {
+	var g grammar
+	g.start = "expr'"
+	g.productions = []production{
+		{"expr'", []grammarSymbol{"expr"}},
+		{"expr", []grammarSymbol{"expr", "+", "term"}},
+		{"expr", []grammarSymbol{"term"}},
+		{"term", []grammarSymbol{"term", "*", "factor"}},
+		{"term", []grammarSymbol{"factor"}},
+		{"factor", []grammarSymbol{"number"}},
+		{"factor", []grammarSymbol{"(", "expr", ")"}},
+	}
+
+	table := g.compile()
+	fmt.Println(table)
 }

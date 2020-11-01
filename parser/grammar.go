@@ -101,6 +101,15 @@ func (g grammar) getProductionsOfSymbol(s grammarSymbol) []production {
 	return productions
 }
 
+func (g grammar) getProductionNumber(p production) int {
+	for i := range g.productions {
+		if g.productions[i].equals(p) {
+			return i
+		}
+	}
+	return -1
+}
+
 func (g grammar) equals(g2 grammar) bool {
 	if g.start != g2.start {
 		return false
@@ -118,4 +127,40 @@ func (g grammar) equals(g2 grammar) bool {
 	}
 
 	return true
+}
+
+func (g grammar) compile() parsingTable {
+	table := make(parsingTable)
+	startProduction := g.getProductionsOfSymbol(g.start)[0]
+	startItem := lrItem{g, startProduction, 0}
+	startItemSet := startItem.computeClosureSet()
+	q := make(queueOfItemSets, 0, 10)
+	q.enqueue(startItemSet)
+	seen := make(seenLrItemSets, 0, 100)
+
+	for !q.empty() {
+		currentItemSet := q.dequeue()
+
+		// Add shift moves.
+		for symbol := range currentItemSet.getNextSymbols() {
+			nextItemSet := currentItemSet.getNextItemSet(symbol)
+			if !seen.has(nextItemSet) {
+				seen.add(nextItemSet)
+				q.enqueue(nextItemSet)
+			}
+			table.addShiftMove(seen.getStateNumber(currentItemSet), seen.getStateNumber(nextItemSet), symbol)
+		}
+
+		// Add reduce moves.
+		for _, item := range currentItemSet.itemSet {
+			if item.getNextSymbol() == "" {
+				productionNumber := item.g.getProductionNumber(item.p)
+				for symbol := range item.g.computeFollowSet(item.p.head) {
+					table.addReduceMove(seen.getStateNumber(currentItemSet), productionNumber, symbol)
+				}
+			}
+		}
+	}
+
+	return table
 }
