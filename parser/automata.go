@@ -1,5 +1,7 @@
 package parser
 
+import "fmt"
+
 type lrItem struct {
 	g   grammar
 	p   production
@@ -157,6 +159,7 @@ type parserActionType int
 const (
 	shift parserActionType = iota
 	reduce
+	accept
 )
 
 type parserAction struct {
@@ -170,6 +173,18 @@ func (p *parsingTable) addShiftMove(s state, e state, gs grammarSymbol) {
 	if (*p)[s] == nil {
 		(*p)[s] = make(map[grammarSymbol]parserAction)
 	}
+
+	if existingAction, ok := (*p)[s][gs]; ok {
+		switch existingAction.actionType {
+		case shift:
+			panic(fmt.Sprintf("Shift-shift conflict on state %v and input %v", s, gs))
+		case reduce:
+			panic(fmt.Sprintf("Shift-reduce conflict on state %v and input %v", s, gs))
+		case accept:
+			panic(fmt.Sprintf("Accept-shift conflict on state %v and input %v", s, gs))
+		}
+	}
+
 	(*p)[s][gs] = parserAction{shift, int(e)}
 }
 
@@ -177,5 +192,76 @@ func (p *parsingTable) addReduceMove(s state, productionNumber int, gs grammarSy
 	if (*p)[s] == nil {
 		(*p)[s] = make(map[grammarSymbol]parserAction)
 	}
+
+	if existingAction, ok := (*p)[s][gs]; ok {
+		switch existingAction.actionType {
+		case shift:
+			panic(fmt.Sprintf("Shift-reduce conflict on state %v and input %v", s, gs))
+		case reduce:
+			panic(fmt.Sprintf("Reduce-reduce conflict on state %v and input %v", s, gs))
+		case accept:
+			panic(fmt.Sprintf("Accept-reduce conflict on state %v and input %v", s, gs))
+		}
+	}
+
 	(*p)[s][gs] = parserAction{reduce, productionNumber}
+}
+
+func (p *parsingTable) addAcceptMove(s state) {
+	if (*p)[s] == nil {
+		(*p)[s] = make(map[grammarSymbol]parserAction)
+	}
+
+	(*p)[s]["$"] = parserAction{accept, 0}
+}
+
+type parser struct {
+	g        grammar
+	table    parsingTable
+	stack    parserStack
+	dead     bool
+	accepted bool
+}
+
+func (ps *parser) init(t parsingTable, g grammar) {
+	ps.g = g
+	ps.table = t
+	ps.stack = make(parserStack, 0, 10)
+	ps.stack.push(0)
+	ps.dead = false
+	ps.accepted = false
+}
+
+func (ps *parser) move(input grammarSymbol) {
+	if ps.dead {
+		return
+	}
+
+	if _, ok := ps.table[ps.stack.top()]; !ok {
+		ps.dead = true
+		return
+	}
+
+	if _, ok := ps.table[ps.stack.top()][input]; !ok {
+		ps.dead = true
+		return
+	}
+
+	for ps.table[ps.stack.top()][input].actionType == reduce {
+		prodNumber := ps.table[ps.stack.top()][input].number
+		prod := ps.g.getProductionByNumber(prodNumber)
+		for range prod.body {
+			ps.stack.pop()
+		}
+		nextState := state(ps.table[ps.stack.top()][prod.head].number)
+		ps.stack.push(nextState)
+	}
+
+	switch ps.table[ps.stack.top()][input].actionType {
+	case accept:
+		ps.accepted = true
+	case shift:
+		nextState := state(ps.table[ps.stack.top()][input].number)
+		ps.stack.push(nextState)
+	}
 }

@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -124,6 +123,25 @@ func TestCompile(t *testing.T) {
 		{"factor", []grammarSymbol{"(", "expr", ")"}},
 	}
 
-	table := g.compile()
-	fmt.Println(table)
+	var testData = []struct {
+		input    []string
+		expected bool
+	}{
+		{[]string{"number", "+", "number", "$"}, true},
+		{[]string{"number", "+", "number", "*", "number", "$"}, true},
+		{[]string{"(", "number", "+", "number", "*", "number", "$"}, false},
+		{[]string{"(", "number", "+", "number", "*", "number", ")", "$"}, true},
+		{[]string{"(", "number", "+", "number", ")", "*", "number", ")", "$"}, false},
+		{[]string{"(", "number", "+", "number", ")", "*", "(", "number", "*", "number", ")", "$"}, true},
+	}
+
+	for _, test := range testData {
+		ps := g.compile()
+		for _, token := range test.input {
+			ps.move(grammarSymbol(token))
+		}
+		if ps.accepted != test.expected {
+			t.Errorf("Expected parser to output %v on input %v", test.expected, test.input)
+		}
+	}
 }

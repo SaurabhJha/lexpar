@@ -85,3 +85,23 @@ func (lss *seenLrItemSets) getStateNumber(ls lrItemSet) state {
 	lss.add(ls)
 	return state(len(*lss) - 1)
 }
+
+type parserStack []state
+
+func (ss *parserStack) push(s state) {
+	(*ss) = append(*ss, s)
+}
+
+func (ss *parserStack) top() state {
+	return (*ss)[len(*ss)-1]
+}
+
+func (ss *parserStack) pop() state {
+	top := ss.top()
+	*ss = (*ss)[:len(*ss)-1]
+	return top
+}
+
+func (ss *parserStack) empty() bool {
+	return len(*ss) == 0
+}
