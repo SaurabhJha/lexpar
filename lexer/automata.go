@@ -1,104 +1,82 @@
 package lexer
 
+import (
+	"math"
+)
+
+// nondeterministicFiniteAutomata represent NFAs. They form the intermediate step in regex compilation
+// process and are not for execution.
 type nondeterministicFiniteAutomata struct {
 	start           state
-	final           state
-	current         state
+	final           state // Its guaranteed by the way we construct NFAs that we will have only one final state.
 	transitionGraph nondeterministicGraph
 }
 
-func (n *nondeterministicFiniteAutomata) init(input transitionLabel) {
-	n.start = 0
-	n.final = 1
-	n.current = 0
+func (nfa *nondeterministicFiniteAutomata) init(input transitionLabel) {
+	nfa.start = 0
+	nfa.final = 1
 
-	g := make(nondeterministicGraph)
-	g.addTransition(0, 1, input)
-	n.transitionGraph = g
+	graph := make(nondeterministicGraph)
+	graph.addTransition(0, 1, input)
+	nfa.transitionGraph = graph
 }
 
-func (n *nondeterministicFiniteAutomata) incrementStatesBy(increment state) {
-	n.start += increment
-	n.final += increment
-	n.current += increment
-	n.transitionGraph.incrementStatesBy(increment)
+func (nfa *nondeterministicFiniteAutomata) incrementStatesBy(increment state) {
+	nfa.start += increment
+	nfa.final += increment
+	nfa.transitionGraph.incrementStatesBy(increment)
 }
 
-func (n *nondeterministicFiniteAutomata) combineUsingUnion(o *nondeterministicFiniteAutomata) {
-	n.incrementStatesBy(1)
-	o.incrementStatesBy(n.final + 1)
-	graphF := n.transitionGraph
-	graphO := o.transitionGraph
-	graphF.merge(&graphO)
-	n.transitionGraph = graphF
+func (nfa *nondeterministicFiniteAutomata) combineUsingUnion(otherNfa *nondeterministicFiniteAutomata) {
+	nfa.incrementStatesBy(1)
+	otherNfa.incrementStatesBy(nfa.final + 1)
+	nfa.transitionGraph.merge(&otherNfa.transitionGraph)
 
-	oldFStart := n.start
-	oldOStart := o.start
-	var newStart state
-	if n.start < o.start {
-		newStart = state(n.start - 1)
-	} else {
-		newStart = state(o.start - 1)
-	}
-	n.start = newStart
-	n.transitionGraph.addTransition(n.start, oldFStart, "")
-	n.transitionGraph.addTransition(n.start, oldOStart, "")
+	oldNStart := nfa.start
+	oldOStart := otherNfa.start
+	nfa.start = state(math.Min(float64(nfa.start), float64(otherNfa.start))) - 1
+	nfa.transitionGraph.addTransition(nfa.start, oldNStart, "")
+	nfa.transitionGraph.addTransition(nfa.start, oldOStart, "")
 
-	oldFFinal := n.final
-	oldOFinal := o.final
-	var newFinal state
-	if n.final < o.final {
-		newFinal = state(o.final + 1)
-	} else {
-		newFinal = state(n.final + 1)
-	}
-	n.final = newFinal
-	n.transitionGraph.addTransition(oldFFinal, n.final, "")
-	n.transitionGraph.addTransition(oldOFinal, n.final, "")
-
-	n.current = n.start
+	oldFFinal := nfa.final
+	oldOFinal := otherNfa.final
+	nfa.final = state(math.Max(float64(nfa.final), float64(otherNfa.final))) + 1
+	nfa.transitionGraph.addTransition(oldFFinal, nfa.final, "")
+	nfa.transitionGraph.addTransition(oldOFinal, nfa.final, "")
 }
 
-func (n *nondeterministicFiniteAutomata) combineUsingConcat(o *nondeterministicFiniteAutomata) {
-	oldFFinal := n.final
-	o.incrementStatesBy(oldFFinal + 1)
-	graphF := n.transitionGraph
-	graphO := o.transitionGraph
-	graphF.merge(&graphO)
-	n.transitionGraph = graphF
-	n.transitionGraph.addTransition(oldFFinal, o.start, "")
-	n.final = o.final
-	n.current = n.start
+func (nfa *nondeterministicFiniteAutomata) combineUsingConcat(otherNfa *nondeterministicFiniteAutomata) {
+	otherNfa.incrementStatesBy(nfa.final + 1)
+	nfa.transitionGraph.merge(&otherNfa.transitionGraph)
+	nfa.transitionGraph.addTransition(nfa.final, otherNfa.start, "")
+	nfa.final = otherNfa.final
 }
 
-func (n *nondeterministicFiniteAutomata) applyStar() {
-	n.incrementStatesBy(1)
-	newStart := n.start - 1
-	newFinal := n.final + 1
-	n.transitionGraph.addTransition(newStart, n.start, "")
-	n.transitionGraph.addTransition(n.final, newFinal, "")
-	n.transitionGraph.addTransition(n.final, n.start, "")
-	n.transitionGraph.addTransition(newStart, newFinal, "")
-	n.start = newStart
-	n.final = newFinal
-	n.current = n.start
+func (nfa *nondeterministicFiniteAutomata) applyStar() {
+	nfa.incrementStatesBy(1)
+	nfa.transitionGraph.addTransition(nfa.start-1, nfa.start, "")
+	nfa.transitionGraph.addTransition(nfa.final, nfa.final+1, "")
+	nfa.transitionGraph.addTransition(nfa.final, nfa.start, "")
+	nfa.transitionGraph.addTransition(nfa.start-1, nfa.final+1, "")
+	nfa.start--
+	nfa.final++
 }
 
-func (n *nondeterministicFiniteAutomata) constructClosureSet(s state) setOfStates {
+func (nfa *nondeterministicFiniteAutomata) constructClosureSet(s state) setOfStates {
 	states := make(setOfStates)
 	states.add(s)
-	for _, es := range n.transitionGraph[s][""] {
-		closureSetEs := n.constructClosureSet(es)
+	for _, es := range nfa.transitionGraph[s][""] {
+		closureSetEs := nfa.constructClosureSet(es)
 		states.unionWith(&closureSetEs)
 	}
 	return states
 }
 
-func (n *nondeterministicFiniteAutomata) getOutgoingTransitionLabels(ss setOfStates) setOfTransitionLables {
+func (nfa *nondeterministicFiniteAutomata) getOutgoingTransitionLabels(ss setOfStates) setOfTransitionLables {
 	labels := make(setOfTransitionLables)
 	for s := range ss {
-		for tl := range n.transitionGraph[s] {
-			if len(tl) != 0 {
+		for tl := range nfa.transitionGraph[s] {
+			if tl != "" {
 				labels.add(tl)
 			}
 		}
@@ -106,17 +84,17 @@ func (n *nondeterministicFiniteAutomata) getOutgoingTransitionLabels(ss setOfSta
 	return labels
 }
 
-func (n *nondeterministicFiniteAutomata) getNextDfaState(ss setOfStates, l transitionLabel) setOfStates {
+func (nfa *nondeterministicFiniteAutomata) getNextDfaState(ss setOfStates, l transitionLabel) setOfStates {
 	nextStates := make(setOfStates)
 	for s := range ss {
-		for _, ns := range n.transitionGraph[s][l] {
+		for _, ns := range nfa.transitionGraph[s][l] {
 			nextStates.add(ns)
 		}
 	}
 
 	nextDfaState := make(setOfStates)
 	for s := range nextStates {
-		for o := range n.constructClosureSet(s) {
+		for o := range nfa.constructClosureSet(s) {
 			nextDfaState.add(o)
 		}
 	}
@@ -133,18 +111,18 @@ type deterministicFiniteAutomata struct {
 	accepted        bool
 }
 
-func (n *nondeterministicFiniteAutomata) convertToDfa() deterministicFiniteAutomata {
+func (nfa *nondeterministicFiniteAutomata) convertToDfa() deterministicFiniteAutomata {
 	dfaGraph := make(deterministicGraph)
 	q := make(queue, 0, 100)
 	seen := make(seenStates, 0, 100)
 
-	dfaStartState := n.constructClosureSet(n.start)
+	dfaStartState := nfa.constructClosureSet(nfa.start)
 	q.enqueue(dfaStartState)
 	seen.add(dfaStartState)
 	for !q.empty() {
 		currentDfaState := q.dequeue()
-		for label := range n.getOutgoingTransitionLabels(currentDfaState) {
-			nextDfaState := n.getNextDfaState(currentDfaState, label)
+		for label := range nfa.getOutgoingTransitionLabels(currentDfaState) {
+			nextDfaState := nfa.getNextDfaState(currentDfaState, label)
 			if !seen.has(nextDfaState) {
 				q.enqueue(nextDfaState)
 				seen.add(nextDfaState)
@@ -155,17 +133,12 @@ func (n *nondeterministicFiniteAutomata) convertToDfa() deterministicFiniteAutom
 
 	finalStates := make(setOfStates)
 	for s := range seen {
-		if seen[s].has(n.final) {
+		if seen[s].has(nfa.final) {
 			finalStates.add(state(s))
 		}
 	}
 
-	dfa := new(deterministicFiniteAutomata)
-	dfa.start = 0
-	dfa.final = finalStates
-	dfa.current = dfa.start
-	dfa.transitionGraph = dfaGraph
-	return *dfa
+	return deterministicFiniteAutomata{start: 0, final: finalStates, current: 0, transitionGraph: dfaGraph}
 }
 
 func (d *deterministicFiniteAutomata) move(input transitionLabel) {
@@ -175,8 +148,7 @@ func (d *deterministicFiniteAutomata) move(input transitionLabel) {
 
 	nextState, ok := d.transitionGraph[d.current][input]
 	if !ok {
-		d.dead = true
-		d.accepted = false
+		d.dead, d.accepted = true, false
 		return
 	}
 	d.current = nextState
@@ -186,7 +158,5 @@ func (d *deterministicFiniteAutomata) move(input transitionLabel) {
 }
 
 func (d *deterministicFiniteAutomata) reset() {
-	d.dead = false
-	d.accepted = false
-	d.current = d.start
+	d.dead, d.accepted, d.current = false, false, d.start
 }

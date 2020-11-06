@@ -5,7 +5,7 @@ import "reflect"
 type stack []byte
 
 func (s *stack) push(b byte) {
-	(*s) = append(*s, b)
+	*s = append(*s, b)
 }
 
 func (s *stack) pop() byte {
@@ -86,7 +86,7 @@ func (q *queue) enqueue(s setOfStates) {
 
 func (q *queue) dequeue() setOfStates {
 	front := (*q)[0]
-	(*q) = (*q)[1:]
+	*q = (*q)[1:]
 	return front
 }
 
