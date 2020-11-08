@@ -1,5 +1,7 @@
 package parser
 
+import "reflect"
+
 type setOfSymbols map[grammarSymbol]bool
 
 func (ss *setOfSymbols) add(s grammarSymbol) {
@@ -12,21 +14,17 @@ func (ss *setOfSymbols) unionWith(os *setOfSymbols) {
 	}
 }
 
+func (ss *setOfSymbols) has(s grammarSymbol) bool {
+	return (*ss)[s]
+}
+
 func (ss *setOfSymbols) hasSubset(os *setOfSymbols) bool {
 	for s := range *os {
-		if _, ok := (*ss)[s]; ok == false {
+		if !(*ss).has(s) {
 			return false
 		}
 	}
 	return true
-}
-
-func (ss *setOfSymbols) isEqualTo(os *setOfSymbols) bool {
-	return ss.hasSubset(os) && os.hasSubset(ss)
-}
-
-func (ss *setOfSymbols) has(s grammarSymbol) bool {
-	return (*ss)[s]
 }
 
 type queueOfItems []lrItem
@@ -69,7 +67,7 @@ func (lss *seenLrItemSets) add(ls lrItemSet) {
 
 func (lss *seenLrItemSets) has(ls lrItemSet) bool {
 	for _, sls := range *lss {
-		if sls.equals(&ls) {
+		if reflect.DeepEqual(sls, ls) {
 			return true
 		}
 	}
@@ -78,7 +76,7 @@ func (lss *seenLrItemSets) has(ls lrItemSet) bool {
 
 func (lss *seenLrItemSets) getStateNumber(ls lrItemSet) state {
 	for i, sls := range *lss {
-		if sls.equals(&ls) {
+		if reflect.DeepEqual(sls, ls) {
 			return state(i)
 		}
 	}

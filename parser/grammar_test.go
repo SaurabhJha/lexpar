@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -17,6 +18,44 @@ func TestGetFirstBody(t *testing.T) {
 	for _, test := range testData {
 		if got := test.p.getFirstBodySymbol(); got != test.want {
 			t.Errorf("p.getFirstBodySymbol() = %v, expected %v", got, test.want)
+		}
+	}
+}
+
+func TestGetProductionsOfSymbol(t *testing.T) {
+	var g grammar
+	g.start = "expr'"
+	g.productions = []production{
+		{"expr'", []grammarSymbol{"expr"}},
+		{"expr", []grammarSymbol{"expr", "+", "term"}},
+		{"expr", []grammarSymbol{"term"}},
+		{"term", []grammarSymbol{"term", "*", "factor"}},
+		{"term", []grammarSymbol{"factor"}},
+		{"factor", []grammarSymbol{"number"}},
+		{"factor", []grammarSymbol{"(", "expr", ")"}},
+	}
+
+	var testData = []struct {
+		input    grammarSymbol
+		expected []production
+	}{
+		{
+			"expr'",
+			[]production{g.productions[0]},
+		},
+		{
+			"expr",
+			[]production{g.productions[1], g.productions[2]},
+		},
+		{
+			"term",
+			[]production{g.productions[3], g.productions[4]},
+		},
+	}
+
+	for _, test := range testData {
+		if got := g.getProductionsOfSymbol(test.input); !reflect.DeepEqual(got, test.expected) {
+			t.Errorf("Expected productions of %v to be %v but got %v", test.input, test.expected, got)
 		}
 	}
 }
@@ -45,7 +84,7 @@ func TestComputeFirstSet(t *testing.T) {
 	}
 
 	for _, test := range testData {
-		if got := g.computeFirstSet(test.input); !got.isEqualTo(&test.expected) {
+		if got := g.computeFirstSet(test.input); !reflect.DeepEqual(got, test.expected) {
 			t.Errorf("Expected computeFirstSet(%q) = %v, got %v", test.input, test.expected, got)
 		}
 	}
@@ -74,7 +113,7 @@ func TestComputeFollowSet(t *testing.T) {
 	}
 
 	for _, test := range testData {
-		if got := g.computeFollowSet(test.input); !got.isEqualTo(&test.expected) {
+		if got := g.computeFollowSet(test.input); !reflect.DeepEqual(got, test.expected) {
 			t.Errorf("Expected computeFirstSet(%q) = %v, got %v", test.input, test.expected, got)
 		}
 	}
@@ -124,24 +163,23 @@ func TestCompile(t *testing.T) {
 	}
 
 	var testData = []struct {
-		input    []string
+		input    []grammarSymbol
 		expected bool
 	}{
-		{[]string{"number", "+", "number", "$"}, true},
-		{[]string{"number", "+", "number", "*", "number", "$"}, true},
-		{[]string{"(", "number", "+", "number", "*", "number", "$"}, false},
-		{[]string{"(", "number", "+", "number", "*", "number", ")", "$"}, true},
-		{[]string{"(", "number", "+", "number", ")", "*", "number", ")", "$"}, false},
-		{[]string{"(", "number", "+", "number", ")", "*", "(", "number", "*", "number", ")", "$"}, true},
+		{[]grammarSymbol{"number", "+", "number", "$"}, true},
+		{[]grammarSymbol{"number", "+", "number", "*", "number", "$"}, true},
+		{[]grammarSymbol{"(", "number", "+", "number", "*", "number", "$"}, false},
+		{[]grammarSymbol{"(", "number", "+", "number", "*", "number", ")", "$"}, true},
+		{[]grammarSymbol{"(", "number", "+", "number", ")", "*", "number", ")", "$"}, false},
+		{[]grammarSymbol{"(", "number", "+", "number", ")", "*", "(", "number", "*", "number", ")", "$"}, true},
 	}
 
 	for _, test := range testData {
 		ps := g.compile()
-		for _, token := range test.input {
-			ps.move(grammarSymbol(token))
-		}
+		ps.parse(test.input)
 		if ps.accepted != test.expected {
-			t.Errorf("Expected parser to output %v on input %v", test.expected, test.input)
+			t.Errorf("Expected parser to output %v on input %v, got %v",
+				test.expected, test.input, ps.accepted)
 		}
 	}
 }

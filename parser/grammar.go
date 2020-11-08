@@ -1,5 +1,7 @@
 package parser
 
+import "reflect"
+
 type grammarSymbol string
 
 type production struct {
@@ -13,25 +15,6 @@ func (p production) getFirstBodySymbol() grammarSymbol {
 	}
 
 	return p.body[0]
-}
-
-func (p production) equals(p2 production) bool {
-	if p.head != p2.head {
-		return false
-	}
-
-	if len(p.body) != len(p2.body) {
-		return false
-	}
-
-	for i, s1 := range p.body {
-		s2 := p2.body[i]
-		if s1 != s2 {
-			return false
-		}
-	}
-
-	return true
 }
 
 type grammar struct {
@@ -48,16 +31,27 @@ func (g grammar) isTerminal(s grammarSymbol) bool {
 	return true
 }
 
+func (g grammar) getProductionsOfSymbol(s grammarSymbol) []production {
+	productions := make([]production, 0, 10)
+	for _, p := range g.productions {
+		if p.head == s {
+			productions = append(productions, p)
+		}
+	}
+
+	return productions
+}
+
 func (g grammar) computeFirstSet(s grammarSymbol) setOfSymbols {
-	if g.isTerminal(s) == true {
-		firstSet := setOfSymbols{s: true}
-		return firstSet
+	if g.isTerminal(s) {
+		return setOfSymbols{s: true}
 	}
 
 	firstSet := make(setOfSymbols)
-	for _, production := range g.productions {
-		if production.head == s && production.getFirstBodySymbol() != "" && production.getFirstBodySymbol() != production.head {
-			firstSetOfBody := g.computeFirstSet(production.getFirstBodySymbol())
+	for _, production := range g.getProductionsOfSymbol(s) {
+		firstBodySymbol := production.getFirstBodySymbol()
+		if firstBodySymbol != "" && firstBodySymbol != production.head {
+			firstSetOfBody := g.computeFirstSet(firstBodySymbol)
 			firstSet.unionWith(&firstSetOfBody)
 		}
 	}
@@ -75,8 +69,8 @@ func (g grammar) computeFollowSet(s grammarSymbol) setOfSymbols {
 		followSet.add("$")
 	}
 	for _, p := range g.productions {
-		for i, sym := range p.body {
-			if sym == s {
+		for i, bodySymbol := range p.body {
+			if bodySymbol == s {
 				if i == len(p.body)-1 {
 					followSetOfHead := g.computeFollowSet(p.head)
 					followSet.unionWith(&followSetOfHead)
@@ -90,52 +84,13 @@ func (g grammar) computeFollowSet(s grammarSymbol) setOfSymbols {
 	return followSet
 }
 
-func (g grammar) getProductionsOfSymbol(s grammarSymbol) []production {
-	productions := make([]production, 0, 10)
-	for _, p := range g.productions {
-		if p.head == s {
-			productions = append(productions, p)
-		}
-	}
-
-	return productions
-}
-
 func (g grammar) getProductionNumber(p production) int {
 	for i := range g.productions {
-		if g.productions[i].equals(p) {
+		if reflect.DeepEqual(g.productions[i], p) {
 			return i
 		}
 	}
 	return -1
-}
-
-func (g grammar) getProductionByNumber(i int) production {
-	for j, p := range g.productions {
-		if j == i {
-			return p
-		}
-	}
-	return production{}
-}
-
-func (g grammar) equals(g2 grammar) bool {
-	if g.start != g2.start {
-		return false
-	}
-
-	if len(g.productions) != len(g2.productions) {
-		return false
-	}
-
-	for i, p1 := range g.productions {
-		p2 := g2.productions[i]
-		if !p1.equals(p2) {
-			return false
-		}
-	}
-
-	return true
 }
 
 func (g grammar) compile() parser {
@@ -150,15 +105,15 @@ func (g grammar) compile() parser {
 
 	for !q.empty() {
 		currentItemSet := q.dequeue()
+		currentState := seen.getStateNumber(currentItemSet)
 
 		// Add shift moves.
 		for symbol := range currentItemSet.getNextSymbols() {
 			nextItemSet := currentItemSet.getNextItemSet(symbol)
 			if !seen.has(nextItemSet) {
-				seen.add(nextItemSet)
 				q.enqueue(nextItemSet)
+				seen.add(nextItemSet)
 			}
-			currentState := seen.getStateNumber(currentItemSet)
 			nextState := seen.getStateNumber(nextItemSet)
 			table.addShiftMove(currentState, nextState, symbol)
 		}
@@ -169,9 +124,9 @@ func (g grammar) compile() parser {
 				productionNumber := item.g.getProductionNumber(item.p)
 				for symbol := range item.g.computeFollowSet(item.p.head) {
 					if productionNumber == 0 && symbol == "$" {
-						table.addAcceptMove(seen.getStateNumber(currentItemSet))
+						table.addAcceptMove(currentState)
 					} else {
-						table.addReduceMove(seen.getStateNumber(currentItemSet), productionNumber, symbol)
+						table.addReduceMove(currentState, productionNumber, symbol)
 					}
 				}
 			}
