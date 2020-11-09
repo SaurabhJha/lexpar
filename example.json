@@ -1,0 +1,26 @@
+{
+    "regularExpressions": {
+        "number": "(1|2|3|4|5|6|7|8|9|0)(1|2|3|4|5|6|7|8|9|0)*",
+        "id": "(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|1|2|3|4|5|6|7|8|9|0)*",
+        "+": "+",
+        "-": "-",
+        "*": "*",
+        "/": "/",
+        "=": "=",
+        "==": "==",
+        "whitespace": "( )( )*"
+    },
+    "grammar": {
+        "start": "expr'",
+        "productions": [
+            {"head": "expr'", "body": ["expr"]},
+            {"head": "expr", "body": ["expr", "+", "term"]},
+            {"head": "expr", "body": ["term"]},
+            {"head": "term", "body": ["term", "*", "factor"]},
+            {"head": "term", "body": ["factor"]},
+            {"head": "factor", "body": ["number"]},
+            {"head": "factor", "body": ["id"]},
+            {"head": "factor", "body": ["(", "expr", ")"]}
+        ]
+    }
+}

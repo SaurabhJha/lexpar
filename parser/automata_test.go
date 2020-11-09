@@ -6,8 +6,8 @@ import (
 )
 
 func TestLrItemNextSymbol(t *testing.T) {
-	var g grammar
-	g.productions = []production{
+	var g Grammar
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "number"}},
 		{"expr", []grammarSymbol{"number"}},
@@ -17,9 +17,9 @@ func TestLrItemNextSymbol(t *testing.T) {
 		item     lrItem
 		expected grammarSymbol
 	}{
-		{lrItem{g, g.productions[0], 1}, ""},
-		{lrItem{g, g.productions[1], 1}, "+"},
-		{lrItem{g, g.productions[2], 0}, "number"},
+		{lrItem{g, g.Productions[0], 1}, ""},
+		{lrItem{g, g.Productions[1], 1}, "+"},
+		{lrItem{g, g.Productions[2], 0}, "number"},
 	}
 
 	for _, test := range testData {
@@ -30,8 +30,8 @@ func TestLrItemNextSymbol(t *testing.T) {
 }
 
 func TestLrItemGetNextItem(t *testing.T) {
-	var g grammar
-	g.productions = []production{
+	var g Grammar
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "number"}},
 		{"expr", []grammarSymbol{"number"}},
@@ -42,9 +42,9 @@ func TestLrItemGetNextItem(t *testing.T) {
 		inputSymbol grammarSymbol
 		expected    lrItem
 	}{
-		{lrItem{g, g.productions[1], 0}, "expr", lrItem{g, g.productions[1], 1}},
-		{lrItem{g, g.productions[2], 0}, "number", lrItem{g, g.productions[2], 1}},
-		{lrItem{g, g.productions[2], 0}, "expr", lrItem{}},
+		{lrItem{g, g.Productions[1], 0}, "expr", lrItem{g, g.Productions[1], 1}},
+		{lrItem{g, g.Productions[2], 0}, "number", lrItem{g, g.Productions[2], 1}},
+		{lrItem{g, g.Productions[2], 0}, "expr", lrItem{}},
 	}
 
 	for _, test := range testData {
@@ -55,8 +55,8 @@ func TestLrItemGetNextItem(t *testing.T) {
 }
 
 func TestLrItemEmpty(t *testing.T) {
-	var g grammar
-	g.productions = []production{
+	var g Grammar
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "number"}},
 		{"expr", []grammarSymbol{"number"}},
@@ -66,7 +66,7 @@ func TestLrItemEmpty(t *testing.T) {
 		inputItem lrItem
 		expected  bool
 	}{
-		{lrItem{g, g.productions[2], 1}, false},
+		{lrItem{g, g.Productions[2], 1}, false},
 		{lrItem{}, true},
 	}
 
@@ -78,8 +78,8 @@ func TestLrItemEmpty(t *testing.T) {
 }
 
 func TestLrItemSetHas(t *testing.T) {
-	var g grammar
-	g.productions = []production{
+	var g Grammar
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "number"}},
 		{"expr", []grammarSymbol{"number"}},
@@ -93,45 +93,45 @@ func TestLrItemSetHas(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[1], 0},
-					{g, g.productions[2], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[1], 0},
+					{g, g.Productions[2], 0},
 				},
 			},
-			lrItem{g, g.productions[1], 0},
+			lrItem{g, g.Productions[1], 0},
 			true,
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 1},
-					{g, g.productions[1], 0},
-					{g, g.productions[2], 2},
+					{g, g.Productions[0], 1},
+					{g, g.Productions[1], 0},
+					{g, g.Productions[2], 2},
 				},
 			},
-			lrItem{g, g.productions[2], 2},
+			lrItem{g, g.Productions[2], 2},
 			true,
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 1},
-					{g, g.productions[1], 0},
-					{g, g.productions[2], 2},
+					{g, g.Productions[0], 1},
+					{g, g.Productions[1], 0},
+					{g, g.Productions[2], 2},
 				},
 			},
-			lrItem{g, g.productions[1], 0},
+			lrItem{g, g.Productions[1], 0},
 			true,
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 1},
-					{g, g.productions[1], 0},
-					{g, g.productions[2], 2},
+					{g, g.Productions[0], 1},
+					{g, g.Productions[1], 0},
+					{g, g.Productions[2], 2},
 				},
 			},
-			lrItem{g, g.productions[1], 1},
+			lrItem{g, g.Productions[1], 1},
 			false,
 		},
 	}
@@ -144,8 +144,8 @@ func TestLrItemSetHas(t *testing.T) {
 }
 
 func TestLrItemSetEquals(t *testing.T) {
-	var g grammar
-	g.productions = []production{
+	var g Grammar
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "number"}},
 		{"expr", []grammarSymbol{"number"}},
@@ -159,14 +159,14 @@ func TestLrItemSetEquals(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[2], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[2], 0},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[2], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[2], 0},
 				},
 			},
 			true,
@@ -174,14 +174,14 @@ func TestLrItemSetEquals(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[2], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[2], 0},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[1], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[1], 0},
 				},
 			},
 			false,
@@ -189,16 +189,16 @@ func TestLrItemSetEquals(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[1], 0},
-					{g, g.productions[2], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[1], 0},
+					{g, g.Productions[2], 0},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[2], 0},
-					{g, g.productions[1], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[2], 0},
+					{g, g.Productions[1], 0},
 				},
 			},
 			true,
@@ -213,8 +213,8 @@ func TestLrItemSetEquals(t *testing.T) {
 }
 
 func TestLrItemSetAdd(t *testing.T) {
-	var g grammar
-	g.productions = []production{
+	var g Grammar
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "number"}},
 		{"expr", []grammarSymbol{"number"}},
@@ -228,33 +228,33 @@ func TestLrItemSetAdd(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[2], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[2], 0},
 				},
 			},
-			lrItem{g, g.productions[1], 0},
+			lrItem{g, g.Productions[1], 0},
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[2], 0},
-					{g, g.productions[1], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[2], 0},
+					{g, g.Productions[1], 0},
 				},
 			},
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[1], 0},
-					{g, g.productions[2], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[1], 0},
+					{g, g.Productions[2], 0},
 				},
 			},
-			lrItem{g, g.productions[1], 0},
+			lrItem{g, g.Productions[1], 0},
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[2], 0},
-					{g, g.productions[1], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[2], 0},
+					{g, g.Productions[1], 0},
 				},
 			},
 		},
@@ -268,8 +268,8 @@ func TestLrItemSetAdd(t *testing.T) {
 }
 
 func TestComputeLrItemSetNextSymbols(t *testing.T) {
-	var g grammar
-	g.productions = []production{
+	var g Grammar
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "number"}},
 		{"expr", []grammarSymbol{"number"}},
@@ -282,8 +282,8 @@ func TestComputeLrItemSetNextSymbols(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 1},
-					{g, g.productions[2], 1},
+					{g, g.Productions[0], 1},
+					{g, g.Productions[2], 1},
 				},
 			},
 			setOfSymbols{},
@@ -291,9 +291,9 @@ func TestComputeLrItemSetNextSymbols(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[1], 0},
-					{g, g.productions[2], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[1], 0},
+					{g, g.Productions[2], 0},
 				},
 			},
 			setOfSymbols{"expr": true, "number": true},
@@ -308,8 +308,8 @@ func TestComputeLrItemSetNextSymbols(t *testing.T) {
 }
 
 func TestComputeLrItemSetMergeWith(t *testing.T) {
-	var g grammar
-	g.productions = []production{
+	var g Grammar
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "number"}},
 		{"expr", []grammarSymbol{"number"}},
@@ -323,21 +323,21 @@ func TestComputeLrItemSetMergeWith(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 1},
-					{g, g.productions[2], 1},
+					{g, g.Productions[0], 1},
+					{g, g.Productions[2], 1},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[2], 1},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[2], 1},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[0], 1},
-					{g, g.productions[2], 1},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[0], 1},
+					{g, g.Productions[2], 1},
 				},
 			},
 		},
@@ -351,9 +351,9 @@ func TestComputeLrItemSetMergeWith(t *testing.T) {
 }
 
 func TestComputeLrItemClosureSet(t *testing.T) {
-	var g grammar
-	g.start = "expr'"
-	g.productions = []production{
+	var g Grammar
+	g.Start = "expr'"
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "term"}},
 		{"expr", []grammarSymbol{"term"}},
@@ -369,61 +369,61 @@ func TestComputeLrItemClosureSet(t *testing.T) {
 		expected lrItemSet
 	}{
 		{
-			lrItem{g, g.productions[0], 0},
+			lrItem{g, g.Productions[0], 0},
 			lrItemSet{
 				itemSet: []lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[1], 0},
-					{g, g.productions[2], 0},
-					{g, g.productions[4], 0},
-					{g, g.productions[3], 0},
-					{g, g.productions[6], 0},
-					{g, g.productions[5], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[1], 0},
+					{g, g.Productions[2], 0},
+					{g, g.Productions[4], 0},
+					{g, g.Productions[3], 0},
+					{g, g.Productions[6], 0},
+					{g, g.Productions[5], 0},
 				},
 			},
 		},
 		{
-			lrItem{g, g.productions[3], 0},
+			lrItem{g, g.Productions[3], 0},
 			lrItemSet{
 				itemSet: []lrItem{
-					{g, g.productions[6], 0},
-					{g, g.productions[4], 0},
-					{g, g.productions[5], 0},
-					{g, g.productions[3], 0},
+					{g, g.Productions[6], 0},
+					{g, g.Productions[4], 0},
+					{g, g.Productions[5], 0},
+					{g, g.Productions[3], 0},
 				},
 			},
 		},
 		{
-			lrItem{g, g.productions[4], 0},
+			lrItem{g, g.Productions[4], 0},
 			lrItemSet{
 				itemSet: []lrItem{
-					{g, g.productions[4], 0},
-					{g, g.productions[6], 0},
-					{g, g.productions[5], 0},
+					{g, g.Productions[4], 0},
+					{g, g.Productions[6], 0},
+					{g, g.Productions[5], 0},
 				},
 			},
 		},
 		{
-			lrItem{g, g.productions[1], 1},
+			lrItem{g, g.Productions[1], 1},
 			lrItemSet{
 				itemSet: []lrItem{
-					{g, g.productions[1], 1},
+					{g, g.Productions[1], 1},
 				},
 			},
 		},
 		{
-			lrItem{g, g.productions[3], 1},
+			lrItem{g, g.Productions[3], 1},
 			lrItemSet{
 				itemSet: []lrItem{
-					{g, g.productions[3], 1},
+					{g, g.Productions[3], 1},
 				},
 			},
 		},
 		{
-			lrItem{g, g.productions[3], 3},
+			lrItem{g, g.Productions[3], 3},
 			lrItemSet{
 				itemSet: []lrItem{
-					{g, g.productions[3], 3},
+					{g, g.Productions[3], 3},
 				},
 			},
 		},
@@ -437,8 +437,8 @@ func TestComputeLrItemClosureSet(t *testing.T) {
 }
 
 func TestComputeLrItemSetNext(t *testing.T) {
-	var g grammar
-	g.productions = []production{
+	var g Grammar
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "number"}},
 		{"expr", []grammarSymbol{"number"}},
@@ -452,23 +452,23 @@ func TestComputeLrItemSetNext(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 0},
-					{g, g.productions[1], 0},
-					{g, g.productions[2], 0},
+					{g, g.Productions[0], 0},
+					{g, g.Productions[1], 0},
+					{g, g.Productions[2], 0},
 				},
 			},
 			"expr",
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[0], 1},
-					{g, g.productions[1], 1},
+					{g, g.Productions[0], 1},
+					{g, g.Productions[1], 1},
 				},
 			},
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.productions[1], 1},
+					{g, g.Productions[1], 1},
 				},
 			},
 			"expr",

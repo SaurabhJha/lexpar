@@ -4,37 +4,39 @@ import "reflect"
 
 type grammarSymbol string
 
-type production struct {
-	head grammarSymbol
-	body []grammarSymbol
+// Production represents a grammar production in Backus-Naur form.
+type Production struct {
+	Head grammarSymbol
+	Body []grammarSymbol
 }
 
-func (p production) getFirstBodySymbol() grammarSymbol {
-	if len(p.body) == 0 {
+func (p Production) getFirstBodySymbol() grammarSymbol {
+	if len(p.Body) == 0 {
 		return ""
 	}
 
-	return p.body[0]
+	return p.Body[0]
 }
 
-type grammar struct {
-	productions []production
-	start       grammarSymbol
+// Grammar represents a list of productions and a start symbol.
+type Grammar struct {
+	Productions []Production
+	Start       grammarSymbol
 }
 
-func (g grammar) isTerminal(s grammarSymbol) bool {
-	for _, production := range g.productions {
-		if s == production.head {
+func (g Grammar) isTerminal(s grammarSymbol) bool {
+	for _, production := range g.Productions {
+		if s == production.Head {
 			return false
 		}
 	}
 	return true
 }
 
-func (g grammar) getProductionsOfSymbol(s grammarSymbol) []production {
-	productions := make([]production, 0, 10)
-	for _, p := range g.productions {
-		if p.head == s {
+func (g Grammar) getProductionsOfSymbol(s grammarSymbol) []Production {
+	productions := make([]Production, 0, 10)
+	for _, p := range g.Productions {
+		if p.Head == s {
 			productions = append(productions, p)
 		}
 	}
@@ -42,7 +44,7 @@ func (g grammar) getProductionsOfSymbol(s grammarSymbol) []production {
 	return productions
 }
 
-func (g grammar) computeFirstSet(s grammarSymbol) setOfSymbols {
+func (g Grammar) computeFirstSet(s grammarSymbol) setOfSymbols {
 	if g.isTerminal(s) {
 		return setOfSymbols{s: true}
 	}
@@ -50,7 +52,7 @@ func (g grammar) computeFirstSet(s grammarSymbol) setOfSymbols {
 	firstSet := make(setOfSymbols)
 	for _, production := range g.getProductionsOfSymbol(s) {
 		firstBodySymbol := production.getFirstBodySymbol()
-		if firstBodySymbol != "" && firstBodySymbol != production.head {
+		if firstBodySymbol != "" && firstBodySymbol != production.Head {
 			firstSetOfBody := g.computeFirstSet(firstBodySymbol)
 			firstSet.unionWith(&firstSetOfBody)
 		}
@@ -59,23 +61,23 @@ func (g grammar) computeFirstSet(s grammarSymbol) setOfSymbols {
 	return firstSet
 }
 
-func (g grammar) computeFollowSet(s grammarSymbol) setOfSymbols {
+func (g Grammar) computeFollowSet(s grammarSymbol) setOfSymbols {
 	if g.isTerminal(s) {
 		return setOfSymbols{}
 	}
 
 	followSet := setOfSymbols{}
-	if s == g.start {
+	if s == g.Start {
 		followSet.add("$")
 	}
-	for _, p := range g.productions {
-		for i, bodySymbol := range p.body {
+	for _, p := range g.Productions {
+		for i, bodySymbol := range p.Body {
 			if bodySymbol == s {
-				if i == len(p.body)-1 {
-					followSetOfHead := g.computeFollowSet(p.head)
+				if i == len(p.Body)-1 {
+					followSetOfHead := g.computeFollowSet(p.Head)
 					followSet.unionWith(&followSetOfHead)
 				} else {
-					firstSetOfNextSym := g.computeFirstSet(p.body[i+1])
+					firstSetOfNextSym := g.computeFirstSet(p.Body[i+1])
 					followSet.unionWith(&firstSetOfNextSym)
 				}
 			}
@@ -84,18 +86,18 @@ func (g grammar) computeFollowSet(s grammarSymbol) setOfSymbols {
 	return followSet
 }
 
-func (g grammar) getProductionNumber(p production) int {
-	for i := range g.productions {
-		if reflect.DeepEqual(g.productions[i], p) {
+func (g Grammar) getProductionNumber(p Production) int {
+	for i := range g.Productions {
+		if reflect.DeepEqual(g.Productions[i], p) {
 			return i
 		}
 	}
 	return -1
 }
 
-func (g grammar) compile() parser {
+func (g Grammar) compile() parser {
 	table := make(parsingTable)
-	startProduction := g.getProductionsOfSymbol(g.start)[0]
+	startProduction := g.getProductionsOfSymbol(g.Start)[0]
 	startItem := lrItem{g, startProduction, 0}
 	startItemSet := startItem.computeClosureSet()
 	q := make(queueOfItemSets, 0, 10)
@@ -122,7 +124,7 @@ func (g grammar) compile() parser {
 		for _, item := range currentItemSet.itemSet {
 			if item.getNextSymbol() == "" {
 				productionNumber := item.g.getProductionNumber(item.p)
-				for symbol := range item.g.computeFollowSet(item.p.head) {
+				for symbol := range item.g.computeFollowSet(item.p.Head) {
 					if productionNumber == 0 && symbol == "$" {
 						table.addAcceptMove(currentState)
 					} else {

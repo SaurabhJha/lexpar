@@ -6,30 +6,30 @@ import (
 )
 
 type lrItem struct {
-	g   grammar
-	p   production
+	g   Grammar
+	p   Production
 	pos int
 }
 
 func (l lrItem) getNextSymbol() grammarSymbol {
-	if l.pos == len(l.p.body) {
+	if l.pos == len(l.p.Body) {
 		return ""
 	}
-	return l.p.body[l.pos]
+	return l.p.Body[l.pos]
 }
 
 func (l lrItem) getNextItem(s grammarSymbol) lrItem {
-	if l.pos >= len(l.p.body) {
+	if l.pos >= len(l.p.Body) {
 		return lrItem{}
 	}
-	if l.p.body[l.pos] != s {
+	if l.p.Body[l.pos] != s {
 		return lrItem{}
 	}
 	return lrItem{l.g, l.p, l.pos + 1}
 }
 
 func (l lrItem) empty() bool {
-	return reflect.DeepEqual(l, lrItem{grammar{nil, ""}, production{"", nil}, 0})
+	return reflect.DeepEqual(l, lrItem{Grammar{nil, ""}, Production{"", nil}, 0})
 }
 
 type lrItemSet struct {
@@ -198,19 +198,18 @@ func (p *parsingTable) addAcceptMove(s state) {
 }
 
 type parser struct {
-	g        grammar
-	table    parsingTable
-	stack    parserStack
-	dead     bool
-	accepted bool
-	output   []parserAction
+	g          Grammar
+	table      parsingTable
+	stack      parserStack
+	dead       bool
+	accepted   bool
+	reductions []Production
 }
 
-func (ps *parser) init(t parsingTable, g grammar) {
+func (ps *parser) init(t parsingTable, g Grammar) {
 	stack := make(parserStack, 0, 10)
 	stack.push(0)
-	out := make([]parserAction, 0, 100)
-	*ps = parser{g, t, stack, false, false, out}
+	*ps = parser{g, t, stack, false, false, []Production{}}
 }
 
 func (ps *parser) move(input grammarSymbol) {
@@ -231,24 +230,22 @@ func (ps *parser) move(input grammarSymbol) {
 	// Make as many reduce moves as possible on current input symbol
 	for ps.table[ps.stack.top()][input].actionType == reduce {
 		prodNumber := ps.table[ps.stack.top()][input].number
-		prod := ps.g.productions[prodNumber]
-		for range prod.body {
+		prod := ps.g.Productions[prodNumber]
+		for range prod.Body {
 			ps.stack.pop()
 		}
-		nextParserAction := ps.table[ps.stack.top()][prod.head]
-		ps.output = append(ps.output, nextParserAction)
+		nextParserAction := ps.table[ps.stack.top()][prod.Head]
 		nextState := state(nextParserAction.number)
 		ps.stack.push(nextState)
+		ps.reductions = append(ps.reductions, prod)
 	}
 
 	switch nextParserAction := ps.table[ps.stack.top()][input]; nextParserAction.actionType {
 	case accept:
 		ps.accepted = true
-		ps.output = append(ps.output, nextParserAction)
 	case shift:
 		nextState := state(ps.table[ps.stack.top()][input].number)
 		ps.stack.push(nextState)
-		ps.output = append(ps.output, nextParserAction)
 	}
 }
 

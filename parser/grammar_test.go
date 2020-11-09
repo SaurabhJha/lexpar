@@ -7,12 +7,12 @@ import (
 
 func TestGetFirstBody(t *testing.T) {
 	var testData = []struct {
-		p    production
+		p    Production
 		want grammarSymbol
 	}{
-		{production{"expr", []grammarSymbol{"expr", "+", "term"}}, "expr"},
-		{production{"term", []grammarSymbol{"factor"}}, "factor"},
-		{production{"expr'", []grammarSymbol{}}, ""},
+		{Production{"expr", []grammarSymbol{"expr", "+", "term"}}, "expr"},
+		{Production{"term", []grammarSymbol{"factor"}}, "factor"},
+		{Production{"expr'", []grammarSymbol{}}, ""},
 	}
 
 	for _, test := range testData {
@@ -23,9 +23,9 @@ func TestGetFirstBody(t *testing.T) {
 }
 
 func TestGetProductionsOfSymbol(t *testing.T) {
-	var g grammar
-	g.start = "expr'"
-	g.productions = []production{
+	var g Grammar
+	g.Start = "expr'"
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "term"}},
 		{"expr", []grammarSymbol{"term"}},
@@ -37,19 +37,19 @@ func TestGetProductionsOfSymbol(t *testing.T) {
 
 	var testData = []struct {
 		input    grammarSymbol
-		expected []production
+		expected []Production
 	}{
 		{
 			"expr'",
-			[]production{g.productions[0]},
+			[]Production{g.Productions[0]},
 		},
 		{
 			"expr",
-			[]production{g.productions[1], g.productions[2]},
+			[]Production{g.Productions[1], g.Productions[2]},
 		},
 		{
 			"term",
-			[]production{g.productions[3], g.productions[4]},
+			[]Production{g.Productions[3], g.Productions[4]},
 		},
 	}
 
@@ -61,9 +61,9 @@ func TestGetProductionsOfSymbol(t *testing.T) {
 }
 
 func TestComputeFirstSet(t *testing.T) {
-	var g grammar
-	g.start = "expr'"
-	g.productions = []production{
+	var g Grammar
+	g.Start = "expr'"
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "term"}},
 		{"expr", []grammarSymbol{"term"}},
@@ -91,9 +91,9 @@ func TestComputeFirstSet(t *testing.T) {
 }
 
 func TestComputeFollowSet(t *testing.T) {
-	var g grammar
-	g.start = "expr'"
-	g.productions = []production{
+	var g Grammar
+	g.Start = "expr'"
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "term"}},
 		{"expr", []grammarSymbol{"term"}},
@@ -120,9 +120,9 @@ func TestComputeFollowSet(t *testing.T) {
 }
 
 func TestGetProductionNumber(t *testing.T) {
-	var g grammar
-	g.start = "expr'"
-	g.productions = []production{
+	var g Grammar
+	g.Start = "expr'"
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "term"}},
 		{"expr", []grammarSymbol{"term"}},
@@ -133,13 +133,13 @@ func TestGetProductionNumber(t *testing.T) {
 	}
 
 	var testData = []struct {
-		input    production
+		input    Production
 		expected int
 	}{
-		{production{"expr", []grammarSymbol{"expr", "+", "term"}}, 1},
-		{production{"term", []grammarSymbol{"term", "*", "factor"}}, 3},
-		{production{"factor", []grammarSymbol{"number"}}, 5},
-		{production{"expr", []grammarSymbol{"factor"}}, -1},
+		{Production{"expr", []grammarSymbol{"expr", "+", "term"}}, 1},
+		{Production{"term", []grammarSymbol{"term", "*", "factor"}}, 3},
+		{Production{"factor", []grammarSymbol{"number"}}, 5},
+		{Production{"expr", []grammarSymbol{"factor"}}, -1},
 	}
 
 	for _, test := range testData {
@@ -150,9 +150,9 @@ func TestGetProductionNumber(t *testing.T) {
 }
 
 func TestCompile(t *testing.T) {
-	var g grammar
-	g.start = "expr'"
-	g.productions = []production{
+	var g Grammar
+	g.Start = "expr'"
+	g.Productions = []Production{
 		{"expr'", []grammarSymbol{"expr"}},
 		{"expr", []grammarSymbol{"expr", "+", "term"}},
 		{"expr", []grammarSymbol{"term"}},
