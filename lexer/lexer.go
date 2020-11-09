@@ -1,63 +1,81 @@
 package lexer
 
-import "fmt"
+// Tokenizer is the data structure used to export all the functionality that can
+// be expected from a tokenizer or lexer.
+type Tokenizer struct {
+	automata map[string]deterministicFiniteAutomata
+}
 
-type token struct {
+// Init sets up all the state required for Tokenizer to start processing strings.
+func (t *Tokenizer) Init(regexJSON map[string]string) {
+	t.automata = make(map[string]deterministicFiniteAutomata)
+	for regexID, regexString := range regexJSON {
+		regex := regularExpression(regexString)
+		nfa := regex.compile()
+		dfa := nfa.convertToDfa()
+		t.automata[regexID] = dfa
+	}
+}
+
+func (t *Tokenizer) getMatchingPrefix(regexID string, input string) string {
+	dfa := t.automata[regexID]
+	acceptedAt := -1
+	for pos, character := range input {
+		label := transitionLabel(string(character))
+		dfa.move(label)
+		if dfa.dead {
+			break
+		}
+		if dfa.accepted {
+			acceptedAt = pos
+		}
+	}
+	dfa.reset()
+	return input[:acceptedAt+1]
+}
+
+func (t *Tokenizer) getMaxMatchingPrefix(input string) (string, string) {
+	var maxPrefix string
+	var maxRegexID string
+	for id := range t.automata {
+		prefix := t.getMatchingPrefix(id, input)
+		if len(prefix) > len(maxPrefix) {
+			maxPrefix = prefix
+			maxRegexID = id
+		}
+	}
+	return maxRegexID, maxPrefix
+}
+
+// Token represents the output of the lexer.
+type Token struct {
 	tokenType string
 	lexeme    string
 }
 
-func compileRegex(r map[string]regularExpression) map[string]deterministicFiniteAutomata {
-	automataTable := make(map[string]deterministicFiniteAutomata)
-	for label, regex := range r {
-		nfa := regex.compile()
-		dfa := nfa.convertToDfa()
-		automataTable[label] = dfa
-	}
-	return automataTable
+// TokenType reads off the type of the token
+func (token *Token) TokenType() string {
+	return token.tokenType
 }
 
-func matchPrefix(d deterministicFiniteAutomata, s string) string {
-	matchingPrefixIndex := -1
-	for i, character := range s {
-		d.move(transitionLabel(character))
-		if d.accepted {
-			matchingPrefixIndex = i
-		}
-		if d.dead {
+// Lexeme reads off the matching string of the token
+func (token *Token) Lexeme() string {
+	return token.lexeme
+}
+
+// Tokenize returns an array of tokens given an input string.
+func (t *Tokenizer) Tokenize(input string) []Token {
+	tokens := make([]Token, 0, 100)
+
+	remainingInput := input
+
+	for len(remainingInput) != 0 {
+		nextTokenType, nextLexeme := t.getMaxMatchingPrefix(remainingInput)
+		if len(nextLexeme) == 0 {
 			break
 		}
-	}
-
-	if matchingPrefixIndex == -1 {
-		return ""
-	}
-	return s[:matchingPrefixIndex+1]
-}
-
-func getMaxMatchedPrefix(table map[string]deterministicFiniteAutomata, s string) (string, string) {
-	var maxMatchedPrefix string
-	var maxLabel string
-	for l, a := range table {
-		matched := matchPrefix(a, s)
-		if len(matched) > len(maxMatchedPrefix) {
-			maxMatchedPrefix = matched
-			maxLabel = l
-		}
-	}
-	return maxMatchedPrefix, maxLabel
-}
-
-func tokenize(table map[string]deterministicFiniteAutomata, s string) []token {
-	tokens := make([]token, 0, 100)
-	for len(s) != 0 {
-		prefix, label := getMaxMatchedPrefix(table, s)
-		if len(prefix) == 0 {
-			fmt.Println(fmt.Errorf("Problem"))
-			break
-		}
-		s = s[len(prefix):]
-		tokens = append(tokens, token{prefix, label})
+		tokens = append(tokens, Token{nextTokenType, nextLexeme})
+		remainingInput = remainingInput[len(nextLexeme):]
 	}
 
 	return tokens

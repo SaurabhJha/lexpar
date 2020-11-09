@@ -1,72 +1,105 @@
 package lexer
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
-func TestTokenize(t *testing.T) {
-	regularExpressionTable := make(map[string]regularExpression)
-	regularExpressionTable["id"] = regularExpression("(a|b|c)(a|b|c|0|1|2|3)*")
-	regularExpressionTable["number"] = regularExpression("(0|1|2|3)(0|1|2|3)*")
-	regularExpressionTable["+"] = regularExpression("+")
-	regularExpressionTable["*"] = regularExpression("*")
-	regularExpressionTable["("] = regularExpression("(")
-	regularExpressionTable[")"] = regularExpression(")")
-	regularExpressionTable["whitespace"] = regularExpression("( )( )*")
+func TestTokenizerMatchingPrefix(t *testing.T) {
+	regexTable := map[string]string{
+		"id":     "(a|b|c)(a|b|c|0|1|2)*",
+		"number": "(1|2)(0|1|2|3|4)*",
+		"+":      "+",
+	}
+	var tokenizer Tokenizer
+	tokenizer.Init(regexTable)
 
-	automataTable := compileRegex(regularExpressionTable)
+	testData := []struct {
+		id       string
+		input    string
+		expected string
+	}{
+		{"id", "abc+12", "abc"},
+		{"number", "abc+12", ""},
+		{"id", "123+abc", ""},
+		{"number", "123+abc", "123"},
+	}
 
-	var testData = []struct {
+	for _, test := range testData {
+		if got := tokenizer.getMatchingPrefix(test.id, test.input); got != test.expected {
+			t.Errorf("Matching prefix expected %v, got %v", test.expected, got)
+		}
+	}
+}
+
+func TestTokenizerMaxMatchingPrefix(t *testing.T) {
+	regexTable := map[string]string{
+		"id": "(a|b|c)(a|b|c|0|1|2)*",
+		"=":  "=",
+		"==": "==",
+	}
+	var tokenizer Tokenizer
+	tokenizer.Init(regexTable)
+
+	testData := []struct {
 		input          string
-		expectedOutput []token
+		expectedID     string
+		expectedLexeme string
+	}{
+		{"abc121", "id", "abc121"},
+		{"abc+", "id", "abc"},
+		{"==123", "==", "=="},
+	}
+
+	for _, test := range testData {
+		if gotID, gotLexeme := tokenizer.getMaxMatchingPrefix(test.input); gotID != test.expectedID || gotLexeme != test.expectedLexeme {
+			t.Errorf("Max matching prefix expected %v %v, got %v %v",
+				test.expectedID, test.expectedLexeme, gotID, gotLexeme)
+		}
+	}
+}
+
+func TestTokenizerTokenize(t *testing.T) {
+	regexTable := map[string]string{
+		"id":     "(a|b|c)(a|b|c|0|1|2)*",
+		"+":      "+",
+		"=":      "=",
+		"==":     "==",
+		"number": "(1|2|3)(0|1|2|3)*",
+	}
+	var tokenizer Tokenizer
+	tokenizer.Init(regexTable)
+
+	testData := []struct {
+		input    string
+		expected []Token
 	}{
 		{
-			"12 +  1231",
-			[]token{
-				{"12", "number"},
-				{" ", "whitespace"},
+			"123+23",
+			[]Token{
+				{"number", "123"},
 				{"+", "+"},
-				{"  ", "whitespace"},
-				{"1231", "number"},
+				{"number", "23"},
 			},
 		},
 		{
-			"(abca+12)*a",
-			[]token{
-				{"(", "("},
-				{"abca", "id"},
-				{"+", "+"},
-				{"12", "number"},
-				{")", ")"},
-				{"*", "*"},
-				{"a", "id"},
+			"abc==123",
+			[]Token{
+				{"id", "abc"},
+				{"==", "=="},
+				{"number", "123"},
 			},
 		},
 		{
-			"13 + 123 * 1233",
-			[]token{
-				{"13", "number"},
-				{" ", "whitespace"},
-				{"+", "+"},
-				{" ", "whitespace"},
-				{"123", "number"},
-				{" ", "whitespace"},
-				{"*", "*"},
-				{" ", "whitespace"},
-				{"1233", "number"},
-			},
+
+			"**123",
+			[]Token{},
 		},
 	}
 
 	for _, test := range testData {
-		actualOutput := tokenize(automataTable, test.input)
-		if len(actualOutput) != len(test.expectedOutput) {
-			t.Fatalf("For input %v, expected %v but got %v", test.input, test.expectedOutput, actualOutput)
-		}
-
-		for i, expectedToken := range test.expectedOutput {
-			actualToken := actualOutput[i]
-			if actualToken.lexeme != expectedToken.lexeme || actualToken.tokenType != expectedToken.tokenType {
-				t.Fatalf("For input %v, expected %v but got %v", test.input, test.expectedOutput, actualOutput)
-			}
+		if got := tokenizer.Tokenize(test.input); !reflect.DeepEqual(got, test.expected) {
+			t.Errorf("Tokenization on input %v expected %v, got %v", test.input, test.expected, got)
 		}
 	}
 }
