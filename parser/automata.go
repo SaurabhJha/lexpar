@@ -254,3 +254,11 @@ func (ps *parser) parse(input []grammarSymbol) {
 		ps.move(symbol)
 	}
 }
+
+func (ps *parser) reset() {
+	ps.stack = make(parserStack, 0, 10)
+	ps.stack.push(0)
+	ps.dead = false
+	ps.accepted = false
+	ps.reductions = []Production{}
+}

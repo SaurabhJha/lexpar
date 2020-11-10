@@ -21,7 +21,7 @@ func TestRegularExpressionOperatorLength(t *testing.T) {
 
 func TestRegularExpressionIsValid(t *testing.T) {
 	var testData = []struct {
-		input    regularExpression
+		input    RegularExpression
 		expected bool
 	}{
 		{")asdfdf(", false},
@@ -39,7 +39,7 @@ func TestRegularExpressionIsValid(t *testing.T) {
 
 func TestRegularExpressionGetMatchingParenthesis(t *testing.T) {
 	var testData = []struct {
-		input    regularExpression
+		input    RegularExpression
 		expected int
 	}{
 		{"((sdaffd))dasfdaf", 9},
@@ -56,8 +56,8 @@ func TestRegularExpressionGetMatchingParenthesis(t *testing.T) {
 
 func TestRegularExpressionTrimParenthesis(t *testing.T) {
 	var testData = []struct {
-		input    regularExpression
-		expected regularExpression
+		input    RegularExpression
+		expected RegularExpression
 	}{
 		{"(sadf|asdf)", "sadf|asdf"},
 		{"sdfasf", "sdfasf"},
@@ -73,10 +73,10 @@ func TestRegularExpressionTrimParenthesis(t *testing.T) {
 
 func TestRegularExpressionGetOperandsAndOperator(t *testing.T) {
 	var testData = []struct {
-		input                 regularExpression
-		expectedFirstOperand  regularExpression
+		input                 RegularExpression
+		expectedFirstOperand  RegularExpression
 		expectedOperator      regularExpressionOperator
-		expectedSecondOperand regularExpression
+		expectedSecondOperand RegularExpression
 	}{
 		{"s|f", "s", union, "f"},
 		{"sdfasf", "s", concat, "dfasf"},

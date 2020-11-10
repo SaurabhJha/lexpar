@@ -26,3 +26,8 @@ func (P *Parser) Parse(tokens []lexer.Token) []Production {
 	reductions = P.p.reductions
 	return reductions
 }
+
+// Reset resets parser state back to its initial state where it can parse more tokens.
+func (P *Parser) Reset() {
+	P.p.reset()
+}

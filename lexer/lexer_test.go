@@ -6,7 +6,7 @@ import (
 )
 
 func TestTokenizerMatchingPrefix(t *testing.T) {
-	regexTable := map[string]string{
+	regexTable := map[string]RegularExpression{
 		"id":     "(a|b|c)(a|b|c|0|1|2)*",
 		"number": "(1|2)(0|1|2|3|4)*",
 		"+":      "+",
@@ -33,7 +33,7 @@ func TestTokenizerMatchingPrefix(t *testing.T) {
 }
 
 func TestTokenizerMaxMatchingPrefix(t *testing.T) {
-	regexTable := map[string]string{
+	regexTable := map[string]RegularExpression{
 		"id": "(a|b|c)(a|b|c|0|1|2)*",
 		"=":  "=",
 		"==": "==",
@@ -60,7 +60,7 @@ func TestTokenizerMaxMatchingPrefix(t *testing.T) {
 }
 
 func TestTokenizerTokenize(t *testing.T) {
-	regexTable := map[string]string{
+	regexTable := map[string]RegularExpression{
 		"id":     "(a|b|c)(a|b|c|0|1|2)*",
 		"+":      "+",
 		"=":      "=",

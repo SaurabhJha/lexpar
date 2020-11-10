@@ -19,9 +19,11 @@ func (r regularExpressionOperator) length() int {
 	}
 }
 
-type regularExpression string
+// RegularExpression represents the string representation of regular expressions. It has methods for
+// regular expression operations and compilation.
+type RegularExpression string
 
-func (r regularExpression) isValid() bool {
+func (r RegularExpression) isValid() bool {
 	s := make(stack, 0, 10)
 	for _, character := range r {
 		switch character {
@@ -38,7 +40,7 @@ func (r regularExpression) isValid() bool {
 	return s.empty()
 }
 
-func (r regularExpression) getMatchingParenIndex() int {
+func (r RegularExpression) getMatchingParenIndex() int {
 	if r[0] != '(' {
 		return -1
 	}
@@ -58,7 +60,7 @@ func (r regularExpression) getMatchingParenIndex() int {
 	return -1
 }
 
-func (r regularExpression) trimParenthesis() regularExpression {
+func (r RegularExpression) trimParenthesis() RegularExpression {
 	if r[0] != '(' {
 		return r
 	}
@@ -68,15 +70,15 @@ func (r regularExpression) trimParenthesis() regularExpression {
 	return r[1 : len(r)-1]
 }
 
-func (r regularExpression) getFirstOperand() regularExpression {
+func (r RegularExpression) getFirstOperand() RegularExpression {
 	if r[0] != '(' {
-		return regularExpression(r[0])
+		return RegularExpression(r[0])
 	}
 
-	return regularExpression(r[:r.getMatchingParenIndex()+1])
+	return RegularExpression(r[:r.getMatchingParenIndex()+1])
 }
 
-func (r regularExpression) getOperator() regularExpressionOperator {
+func (r RegularExpression) getOperator() regularExpressionOperator {
 	operatorIndex := len(r.getFirstOperand())
 	switch r[operatorIndex] {
 	case '|':
@@ -88,12 +90,12 @@ func (r regularExpression) getOperator() regularExpressionOperator {
 	}
 }
 
-func (r regularExpression) getSecondOperand() regularExpression {
+func (r RegularExpression) getSecondOperand() RegularExpression {
 	secondOperandIndex := len(r.getFirstOperand()) + r.getOperator().length()
-	return regularExpression(r[secondOperandIndex:])
+	return RegularExpression(r[secondOperandIndex:])
 }
 
-func (r regularExpression) compile() nondeterministicFiniteAutomata {
+func (r RegularExpression) compile() nondeterministicFiniteAutomata {
 	if len(r) == 0 {
 		var f nondeterministicFiniteAutomata
 		f.init("")

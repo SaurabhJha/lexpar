@@ -291,7 +291,7 @@ func TestNonDeterministicFiniteAutomataConvertToDfa(t *testing.T) {
 
 func TestDeterministicFiniteAutomataMove(t *testing.T) {
 	var testData = []struct {
-		inputRegex regularExpression
+		inputRegex RegularExpression
 		testInput  string
 		expected   bool
 	}{

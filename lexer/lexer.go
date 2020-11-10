@@ -7,10 +7,9 @@ type Tokenizer struct {
 }
 
 // Init sets up all the state required for Tokenizer to start processing strings.
-func (t *Tokenizer) Init(regexJSON map[string]string) {
+func (t *Tokenizer) Init(regexJSON map[string]RegularExpression) {
 	t.automata = make(map[string]deterministicFiniteAutomata)
-	for regexID, regexString := range regexJSON {
-		regex := regularExpression(regexString)
+	for regexID, regex := range regexJSON {
 		nfa := regex.compile()
 		dfa := nfa.convertToDfa()
 		t.automata[regexID] = dfa
@@ -79,4 +78,12 @@ func (t *Tokenizer) Tokenize(input string) []Token {
 	}
 
 	return tokens
+}
+
+// Reset method of tokenizer resets the tokenizer back to its initial state so that it can parse fresh
+// strings.
+func (t *Tokenizer) Reset() {
+	for _, automata := range t.automata {
+		automata.reset()
+	}
 }

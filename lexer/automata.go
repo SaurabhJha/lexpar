@@ -4,8 +4,8 @@ import (
 	"math"
 )
 
-// nondeterministicFiniteAutomata represent NFAs. They form the intermediate step in regex compilation
-// process and are not for execution.
+// nondeterministicFiniteAutomata represent NFAs. They are the intermediate step in regex compilation
+// process and cannot be executed
 type nondeterministicFiniteAutomata struct {
 	start           state
 	final           state // Its guaranteed by the way we construct NFAs that we will have only one final state.
