@@ -10,6 +10,7 @@ type nondeterministicFiniteAutomata struct {
 	start           state
 	final           state // Its guaranteed by the way we construct NFAs that we will have only one final state.
 	transitionGraph nondeterministicGraph
+	closureSets     map[state]setOfStates
 }
 
 func (nfa *nondeterministicFiniteAutomata) init(input transitionLabel) {
@@ -19,6 +20,7 @@ func (nfa *nondeterministicFiniteAutomata) init(input transitionLabel) {
 	graph := make(nondeterministicGraph)
 	graph.addTransition(0, 1, input)
 	nfa.transitionGraph = graph
+	nfa.closureSets = make(map[state]setOfStates)
 }
 
 func (nfa *nondeterministicFiniteAutomata) incrementStatesBy(increment state) {
@@ -63,12 +65,16 @@ func (nfa *nondeterministicFiniteAutomata) applyStar() {
 }
 
 func (nfa *nondeterministicFiniteAutomata) constructClosureSet(s state) setOfStates {
+	if states, ok := nfa.closureSets[s]; ok {
+		return states
+	}
 	states := make(setOfStates)
 	states.add(s)
 	for _, es := range nfa.transitionGraph[s][""] {
 		closureSetEs := nfa.constructClosureSet(es)
 		states.unionWith(&closureSetEs)
 	}
+	nfa.closureSets[s] = states
 	return states
 }
 
