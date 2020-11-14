@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/SaurabhJha/lexpar/ast"
 	"github.com/SaurabhJha/lexpar/io"
 	"github.com/SaurabhJha/lexpar/lexer"
 	"github.com/SaurabhJha/lexpar/parser"
@@ -20,14 +21,15 @@ func main() {
 
 	var pars parser.Parser
 	pars.Init(definitions.Grammar)
+
+	var sdt ast.SyntaxDirectedTranslator
+	sdt.Init(definitions.Grammar, definitions.SemanticRules)
 	for {
 		text := io.ReadFromStdin()
-		fmt.Printf("Input: %v\n", text)
 		tokens := tok.Tokenize(text)
-		fmt.Printf("Tokens: %v\n", tokens)
 		reductions := pars.Parse(tokens)
-		fmt.Printf("Reductions: %v\n", reductions)
-
+		ast := sdt.ConstructAST(tokens, reductions)
+		fmt.Println(ast)
 		tok.Reset()
 		pars.Reset()
 	}

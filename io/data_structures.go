@@ -1,6 +1,7 @@
 package io
 
 import (
+	"github.com/SaurabhJha/lexpar/ast"
 	"github.com/SaurabhJha/lexpar/lexer"
 	"github.com/SaurabhJha/lexpar/parser"
 )
@@ -9,4 +10,5 @@ import (
 type DefinitionsTable struct {
 	RegularExpressions map[string]lexer.RegularExpression `json:"regularExpressions"`
 	Grammar            parser.Grammar                     `json:"grammar"`
+	SemanticRules      []ast.SemanticRule                 `json:"semanticRules"`
 }

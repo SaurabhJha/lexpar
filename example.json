@@ -8,19 +8,85 @@
         "/": "/",
         "=": "=",
         "==": "==",
-        "whitespace": "( )( )*"
+        "whitespace": "( )( )*",
+        "(": "(",
+        ")": ")"
     },
     "grammar": {
         "start": "expr'",
         "productions": [
-            {"head": "expr'", "body": ["expr"]},
-            {"head": "expr", "body": ["expr", "+", "term"]},
-            {"head": "expr", "body": ["term"]},
-            {"head": "term", "body": ["term", "*", "factor"]},
-            {"head": "term", "body": ["factor"]},
-            {"head": "factor", "body": ["number"]},
-            {"head": "factor", "body": ["id"]},
-            {"head": "factor", "body": ["(", "expr", ")"]}
+            {
+                "head": "expr'",
+                "body": ["expr"]
+            },
+            {
+                "head": "expr",
+                "body": ["expr", "+", "term"]
+            },
+            {
+                "head": "expr",
+                "body": ["term"]
+            },
+            {
+                "head": "term",
+                "body": ["term", "*", "factor"]
+            },
+            {
+                "head": "term",
+                "body": ["factor"],
+                "rule": {
+                    "type": "copy",
+                    "children": [],
+                    "rootLabel": ""
+                }
+            },
+            {
+                "head": "factor",
+                "body": ["number"],
+                "rule": {
+                    "type": "copy",
+                    "children": [],
+                    "rootLabel": ""
+                }
+            },
+            {
+                "head": "factor",
+                "body": ["id"],
+                "rule": {
+                    "type": "copy",
+                    "children": [],
+                    "rootLabel": ""
+                }
+            },
+            {
+                "head": "factor",
+                "body": ["(", "expr", ")"],
+                "rule": {
+                    "type": "copy",
+                    "children": [1],
+                    "rootLabel": ""
+                }
+            }
         ]
-    }
+    },
+    "semanticRules": [
+        {
+            "forProductions": [1],
+            "type": "tree",
+            "children": [0, 2],
+            "rootLabel": "+"
+        },
+        {
+            "forProductions": [3],
+            "type": "tree",
+            "children": [0, 2],
+            "rootLabel": "*"
+        },
+        {
+            "forProductions": [7],
+            "type": "copy",
+            "children": [1],
+            "rootLabel": ""
+        }
+    ]
 }
