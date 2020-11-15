@@ -10,6 +10,9 @@ func TestTokenizerMatchingPrefix(t *testing.T) {
 		"id":     "(a|b|c)(a|b|c|0|1|2)*",
 		"number": "(1|2)(0|1|2|3|4)*",
 		"+":      "+",
+		"*":      "/*",
+		"(":      "/(",
+		")":      "/)",
 	}
 	var tokenizer Tokenizer
 	tokenizer.Init(regexTable)
@@ -23,6 +26,9 @@ func TestTokenizerMatchingPrefix(t *testing.T) {
 		{"number", "abc+12", ""},
 		{"id", "123+abc", ""},
 		{"number", "123+abc", "123"},
+		{"(", "(asdf", "("},
+		{"*", "*asdf", "*"},
+		{"*", "asdf", ""},
 	}
 
 	for _, test := range testData {
@@ -66,6 +72,8 @@ func TestTokenizerTokenize(t *testing.T) {
 		"=":      "=",
 		"==":     "==",
 		"number": "(1|2|3)(0|1|2|3)*",
+		"(":      "/(",
+		")":      "/)",
 	}
 	var tokenizer Tokenizer
 	tokenizer.Init(regexTable)
@@ -94,6 +102,18 @@ func TestTokenizerTokenize(t *testing.T) {
 
 			"**123",
 			[]Token{},
+		},
+		{
+			"(12+123)+123",
+			[]Token{
+				{"(", "("},
+				{"number", "12"},
+				{"+", "+"},
+				{"number", "123"},
+				{")", ")"},
+				{"+", "+"},
+				{"number", "123"},
+			},
 		},
 	}
 

@@ -23,13 +23,27 @@ func (r regularExpressionOperator) length() int {
 // regular expression operations and compilation.
 type RegularExpression string
 
+func (r RegularExpression) getCharacters() []string {
+	characters := make([]string, 0, 100)
+	for i := 0; i < len(r); {
+		if r[i] == '/' {
+			characters = append(characters, string(r[i])+string(r[i+1]))
+			i += 2
+		} else {
+			characters = append(characters, string(r[i]))
+			i++
+		}
+	}
+	return characters
+}
+
 func (r RegularExpression) isValid() bool {
 	s := make(stack, 0, 10)
-	for _, character := range r {
-		switch character {
-		case '(':
+	for _, currentCharacter := range r.getCharacters() {
+		switch currentCharacter {
+		case "(":
 			s.push('(')
-		case ')':
+		case ")":
 			if s.empty() {
 				return false
 			}
@@ -41,38 +55,43 @@ func (r RegularExpression) isValid() bool {
 }
 
 func (r RegularExpression) getMatchingParenIndex() int {
-	if r[0] != '(' {
+	characters := r.getCharacters()
+	if characters[0] != "(" {
 		return -1
 	}
 
 	s := make(stack, 0, 10)
-	for i, character := range r {
+	stringLengthSoFar := 0
+	for _, character := range characters {
+		stringLengthSoFar += len(character)
 		switch character {
-		case '(':
+		case "(":
 			s.push('(')
-		case ')':
+		case ")":
 			s.pop()
 		}
 		if s.empty() {
-			return i
+			return stringLengthSoFar - 1
 		}
 	}
 	return -1
 }
 
 func (r RegularExpression) trimParenthesis() RegularExpression {
-	if r[0] != '(' {
+	characters := r.getCharacters()
+	if characters[0] != "(" {
 		return r
 	}
-	if r[len(r)-1] != ')' {
+	if characters[len(characters)-1] != ")" {
 		return r
 	}
 	return r[1 : len(r)-1]
 }
 
 func (r RegularExpression) getFirstOperand() RegularExpression {
-	if r[0] != '(' {
-		return RegularExpression(r[0])
+	characters := r.getCharacters()
+	if characters[0] != "(" {
+		return RegularExpression(characters[0])
 	}
 
 	return RegularExpression(r[:r.getMatchingParenIndex()+1])
@@ -96,15 +115,22 @@ func (r RegularExpression) getSecondOperand() RegularExpression {
 }
 
 func (r RegularExpression) compile() nondeterministicFiniteAutomata {
-	if len(r) == 0 {
+	characters := r.getCharacters()
+	if len(characters) == 0 {
 		var f nondeterministicFiniteAutomata
 		f.init("")
 		return f
 	}
 
-	if len(r) == 1 {
+	if len(characters) == 1 {
 		var f nondeterministicFiniteAutomata
-		f.init(transitionLabel(r[0]))
+		character := characters[0]
+		switch len(character) {
+		case 2:
+			f.init(transitionLabel(character[1]))
+		case 1:
+			f.init(transitionLabel(character[0]))
+		}
 		return f
 	}
 

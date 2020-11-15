@@ -1,5 +1,7 @@
 package lexer
 
+import "fmt"
+
 // Tokenizer is the data structure used to export all the functionality that can
 // be expected from a tokenizer or lexer.
 type Tokenizer struct {
@@ -10,6 +12,9 @@ type Tokenizer struct {
 func (t *Tokenizer) Init(regexJSON map[string]RegularExpression) {
 	t.automata = make(map[string]deterministicFiniteAutomata)
 	for regexID, regex := range regexJSON {
+		if !regex.isValid() {
+			panic(fmt.Sprintf("Regex '%v' is invalid, aborting", regex))
+		}
 		nfa := regex.compile()
 		dfa := nfa.convertToDfa()
 		t.automata[regexID] = dfa

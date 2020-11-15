@@ -28,6 +28,11 @@ func TestRegularExpressionIsValid(t *testing.T) {
 		{"((sdaffd)", false},
 		{"(((dsaf)|sdf)sdf)", true},
 		{"sadfa", true},
+		{"(", false},
+		{")", false},
+		{"/(", true},
+		{"/)", true},
+		{"/(/((a)b(c)/)", true},
 	}
 
 	for _, test := range testData {
@@ -45,6 +50,8 @@ func TestRegularExpressionGetMatchingParenthesis(t *testing.T) {
 		{"((sdaffd))dasfdaf", 9},
 		{"(((dsaf)|sdf)sdf)(sdafdfadsf)", 16},
 		{"sadfa", -1},
+		{"(/[,/])", 6},
+		{"/(()abc", -1},
 	}
 
 	for _, test := range testData {
@@ -62,6 +69,7 @@ func TestRegularExpressionTrimParenthesis(t *testing.T) {
 		{"(sadf|asdf)", "sadf|asdf"},
 		{"sdfasf", "sdfasf"},
 		{"(sdfsdf)*", "(sdfsdf)*"},
+		{"/(sdfasf/)", "/(sdfasf/)"},
 	}
 
 	for _, test := range testData {
@@ -82,6 +90,8 @@ func TestRegularExpressionGetOperandsAndOperator(t *testing.T) {
 		{"sdfasf", "s", concat, "dfasf"},
 		{"(a|f)(c|d)*", "(a|f)", concat, "(c|d)*"},
 		{"(sdfsdf)*", "(sdfsdf)", star, ""},
+		{"/(sdfsdf/)", "/(", concat, "sdfsdf/)"},
+		{"(sdf/|/*abc)|(cdf)", "(sdf/|/*abc)", union, "(cdf)"},
 	}
 
 	for _, test := range testData {
