@@ -4,8 +4,8 @@
         "id": "(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|1|2|3|4|5|6|7|8|9|0)*",
         "+": "+",
         "-": "-",
-        "*": "*",
-        "/": "/",
+        "*": "/*",
+        "/": "//",
         "=": "=",
         "==": "==",
         "whitespace": "( )( )*",
@@ -21,7 +21,12 @@
             },
             {
                 "head": "expr",
-                "body": ["expr", "+", "term"]
+                "body": ["expr", "+", "term"],
+                "rule": {
+                    "type": "tree",
+                    "rootLabel": "+",
+                    "children": [0, 2]
+                }
             },
             {
                 "head": "expr",
@@ -29,64 +34,33 @@
             },
             {
                 "head": "term",
-                "body": ["term", "*", "factor"]
+                "body": ["term", "*", "factor"],
+                "rule": {
+                    "type": "tree",
+                    "rootLabel": "*",
+                    "children": [0, 2]
+                }
             },
             {
                 "head": "term",
-                "body": ["factor"],
-                "rule": {
-                    "type": "copy",
-                    "children": [],
-                    "rootLabel": ""
-                }
+                "body": ["factor"]
             },
             {
                 "head": "factor",
-                "body": ["number"],
-                "rule": {
-                    "type": "copy",
-                    "children": [],
-                    "rootLabel": ""
-                }
+                "body": ["number"]
             },
             {
                 "head": "factor",
-                "body": ["id"],
-                "rule": {
-                    "type": "copy",
-                    "children": [],
-                    "rootLabel": ""
-                }
+                "body": ["id"]
             },
             {
                 "head": "factor",
                 "body": ["(", "expr", ")"],
                 "rule": {
                     "type": "copy",
-                    "children": [1],
-                    "rootLabel": ""
+                    "children": [1]                    
                 }
             }
         ]
-    },
-    "semanticRules": [
-        {
-            "forProductions": [1],
-            "type": "tree",
-            "children": [0, 2],
-            "rootLabel": "+"
-        },
-        {
-            "forProductions": [3],
-            "type": "tree",
-            "children": [0, 2],
-            "rootLabel": "*"
-        },
-        {
-            "forProductions": [7],
-            "type": "copy",
-            "children": [1],
-            "rootLabel": ""
-        }
-    ]
+    }
 }

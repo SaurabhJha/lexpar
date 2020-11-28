@@ -3,6 +3,8 @@ package parser
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/SaurabhJha/lexpar/lexer"
 )
 
 type lrItem struct {
@@ -29,7 +31,13 @@ func (l lrItem) getNextItem(s grammarSymbol) lrItem {
 }
 
 func (l lrItem) empty() bool {
-	return reflect.DeepEqual(l, lrItem{Grammar{nil, ""}, Production{"", nil}, 0})
+	return reflect.DeepEqual(
+		l, lrItem{
+			Grammar{nil, ""},
+			Production{"", nil, SemanticRule{"", "", nil}},
+			0,
+		},
+	)
 }
 
 type lrItemSet struct {
@@ -198,67 +206,94 @@ func (p *parsingTable) addAcceptMove(s state) {
 }
 
 type parser struct {
-	g          Grammar
-	table      parsingTable
-	stack      parserStack
-	dead       bool
-	accepted   bool
-	reductions []Production
+	g        Grammar
+	table    parsingTable
+	pStack   parserStack
+	dead     bool
+	accepted bool
+	ast      SyntaxGraph
+	gStack   graphStack
 }
 
 func (ps *parser) init(t parsingTable, g Grammar) {
 	stack := make(parserStack, 0, 10)
 	stack.push(0)
-	*ps = parser{g, t, stack, false, false, []Production{}}
+	*ps = parser{g, t, stack, false, false, SyntaxGraph{}, graphStack{}}
 }
 
-func (ps *parser) move(input grammarSymbol) {
+func (ps *parser) move(token lexer.Token) {
+	tokenType := grammarSymbol(token.TokenType)
 	if ps.dead {
 		return
 	}
 
-	if _, ok := ps.table[ps.stack.top()]; !ok {
+	if _, ok := ps.table[ps.pStack.top()]; !ok {
 		ps.dead = true
 		return
 	}
 
-	if _, ok := ps.table[ps.stack.top()][input]; !ok {
+	if _, ok := ps.table[ps.pStack.top()][tokenType]; !ok {
 		ps.dead = true
 		return
 	}
 
-	// Make as many reduce moves as possible on current input symbol
-	for ps.table[ps.stack.top()][input].actionType == reduce {
-		prodNumber := ps.table[ps.stack.top()][input].number
+	// Make as many reduce moves as possible on current input symbol and execute production SDD on each
+	// reduction.
+	for ps.table[ps.pStack.top()][tokenType].actionType == reduce {
+		prodNumber := ps.table[ps.pStack.top()][tokenType].number
 		prod := ps.g.Productions[prodNumber]
+
+		// SLR reduction
 		for range prod.Body {
-			ps.stack.pop()
+			ps.pStack.pop()
 		}
-		nextParserAction := ps.table[ps.stack.top()][prod.Head]
+		nextParserAction := ps.table[ps.pStack.top()][prod.Head]
 		nextState := state(nextParserAction.number)
-		ps.stack.push(nextState)
-		ps.reductions = append(ps.reductions, prod)
+		ps.pStack.push(nextState)
+
+		// SDD execution
+		rule := prod.Rule
+		if !rule.isEmpty() {
+			stackContents := make([]int, 0, 5)
+			for range prod.Body {
+				stackContents = append(stackContents, ps.gStack.pop())
+			}
+			switch rule.Type {
+			case "tree":
+				rootNodeIndex := ps.ast.createNewNode(rule.RootLabel)
+				for childIdx := len(rule.Children) - 1; childIdx >= 0; childIdx-- {
+					childNodeIndex := stackContents[rule.Children[childIdx]]
+					ps.ast.addEdge(rootNodeIndex, childNodeIndex)
+				}
+				ps.gStack.push(rootNodeIndex)
+			case "copy":
+				ps.gStack.push(stackContents[rule.Children[0]])
+			}
+		}
 	}
 
-	switch nextParserAction := ps.table[ps.stack.top()][input]; nextParserAction.actionType {
+	switch nextParserAction := ps.table[ps.pStack.top()][tokenType]; nextParserAction.actionType {
 	case accept:
 		ps.accepted = true
 	case shift:
-		nextState := state(ps.table[ps.stack.top()][input].number)
-		ps.stack.push(nextState)
+		nextState := state(ps.table[ps.pStack.top()][tokenType].number)
+		ps.pStack.push(nextState)
+		newNode := ps.ast.createNewNode(token.Lexeme)
+		ps.gStack.push(newNode)
 	}
 }
 
-func (ps *parser) parse(input []grammarSymbol) {
-	for _, symbol := range input {
-		ps.move(symbol)
+func (ps *parser) parse(tokens []lexer.Token) SyntaxGraph {
+	for _, token := range tokens {
+		ps.move(token)
 	}
+	return ps.ast
 }
 
 func (ps *parser) reset() {
-	ps.stack = make(parserStack, 0, 10)
-	ps.stack.push(0)
+	ps.pStack = make(parserStack, 0, 10)
+	ps.pStack.push(0)
 	ps.dead = false
 	ps.accepted = false
-	ps.reductions = []Production{}
+	ps.ast = SyntaxGraph{}
 }

@@ -2,8 +2,13 @@ package lexer
 
 import "fmt"
 
-// Tokenizer is the data structure used to export all the functionality that can
-// be expected from a tokenizer or lexer.
+// Token represents one "word" of a program text. A sequence of tokens are output by a tokenizer.
+type Token struct {
+	TokenType string
+	Lexeme    string
+}
+
+// A Tokenizer object breaks up strings using a collection of regular expressions.
 type Tokenizer struct {
 	automata map[string]deterministicFiniteAutomata
 }
@@ -51,22 +56,6 @@ func (t *Tokenizer) getMaxMatchingPrefix(input string) (string, string) {
 	return maxRegexID, maxPrefix
 }
 
-// Token represents the output of the lexer.
-type Token struct {
-	tokenType string
-	lexeme    string
-}
-
-// TokenType reads off the type of the token
-func (token *Token) TokenType() string {
-	return token.tokenType
-}
-
-// Lexeme reads off the matching string of the token
-func (token *Token) Lexeme() string {
-	return token.lexeme
-}
-
 // Tokenize returns an array of tokens given an input string.
 func (t *Tokenizer) Tokenize(input string) []Token {
 	tokens := make([]Token, 0, 100)
@@ -85,7 +74,7 @@ func (t *Tokenizer) Tokenize(input string) []Token {
 	return tokens
 }
 
-// Reset method of tokenizer resets the tokenizer back to its initial state so that it can parse fresh
+// Reset method of tokenizer resets the tokenizer back to its initial state so that it can parse new
 // strings.
 func (t *Tokenizer) Reset() {
 	for _, automata := range t.automata {

@@ -14,17 +14,11 @@ func (P *Parser) Init(g Grammar) {
 }
 
 // Parse takes as input a slice of tokens and parses them.
-func (P *Parser) Parse(tokens []lexer.Token) []Production {
-	tokenTypes := make([]grammarSymbol, 0, 100)
-	for _, token := range tokens {
-		tokenTypes = append(tokenTypes, grammarSymbol(token.TokenType()))
-	}
-	tokenTypes = append(tokenTypes, "$")
-
-	reductions := make([]Production, 0, 100)
-	P.p.parse(tokenTypes)
-	reductions = P.p.reductions
-	return reductions
+func (P *Parser) Parse(tokens []lexer.Token) SyntaxGraph {
+	tokens = append(tokens, lexer.Token{TokenType: "$", Lexeme: "$"})
+	ast := P.p.parse(tokens)
+	ast.Root = P.p.gStack.top()
+	return ast
 }
 
 // Reset resets parser state back to its initial state where it can parse more tokens.

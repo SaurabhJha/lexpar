@@ -4,10 +4,29 @@ import "reflect"
 
 type grammarSymbol string
 
-// Production represents a grammar production in Backus-Naur form.
+// SemanticRule is a syntax directed definition (SDD) associated with a grammar.
+type SemanticRule struct {
+	Type      string
+	RootLabel string
+	Children  []int
+}
+
+func (rule SemanticRule) isEmpty() bool {
+	return reflect.DeepEqual(
+		rule,
+		SemanticRule{
+			"",
+			"",
+			nil,
+		},
+	)
+}
+
+// Production is a grammar production in Backus-Naur form.
 type Production struct {
 	Head grammarSymbol
 	Body []grammarSymbol
+	Rule SemanticRule
 }
 
 func (p Production) getFirstBodySymbol() grammarSymbol {
@@ -18,7 +37,7 @@ func (p Production) getFirstBodySymbol() grammarSymbol {
 	return p.Body[0]
 }
 
-// Grammar represents a list of productions and a start symbol.
+// Grammar is a context-free grammar which is a list of productions and a start symbol.
 type Grammar struct {
 	Productions []Production
 	Start       grammarSymbol

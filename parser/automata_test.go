@@ -8,9 +8,9 @@ import (
 func TestLrItemNextSymbol(t *testing.T) {
 	var g Grammar
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "number"}},
-		{"expr", []grammarSymbol{"number"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "number"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -32,9 +32,9 @@ func TestLrItemNextSymbol(t *testing.T) {
 func TestLrItemGetNextItem(t *testing.T) {
 	var g Grammar
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "number"}},
-		{"expr", []grammarSymbol{"number"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "number"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -57,9 +57,9 @@ func TestLrItemGetNextItem(t *testing.T) {
 func TestLrItemEmpty(t *testing.T) {
 	var g Grammar
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "number"}},
-		{"expr", []grammarSymbol{"number"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "number"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -80,9 +80,9 @@ func TestLrItemEmpty(t *testing.T) {
 func TestLrItemSetHas(t *testing.T) {
 	var g Grammar
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "number"}},
-		{"expr", []grammarSymbol{"number"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "number"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -146,9 +146,9 @@ func TestLrItemSetHas(t *testing.T) {
 func TestLrItemSetEquals(t *testing.T) {
 	var g Grammar
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "number"}},
-		{"expr", []grammarSymbol{"number"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "number"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -215,9 +215,9 @@ func TestLrItemSetEquals(t *testing.T) {
 func TestLrItemSetAdd(t *testing.T) {
 	var g Grammar
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "number"}},
-		{"expr", []grammarSymbol{"number"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "number"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -270,9 +270,9 @@ func TestLrItemSetAdd(t *testing.T) {
 func TestComputeLrItemSetNextSymbols(t *testing.T) {
 	var g Grammar
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "number"}},
-		{"expr", []grammarSymbol{"number"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "number"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -310,9 +310,9 @@ func TestComputeLrItemSetNextSymbols(t *testing.T) {
 func TestComputeLrItemSetMergeWith(t *testing.T) {
 	var g Grammar
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "number"}},
-		{"expr", []grammarSymbol{"number"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "number"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -354,13 +354,13 @@ func TestComputeLrItemClosureSet(t *testing.T) {
 	var g Grammar
 	g.Start = "expr'"
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "term"}},
-		{"expr", []grammarSymbol{"term"}},
-		{"term", []grammarSymbol{"term", "*", "factor"}},
-		{"term", []grammarSymbol{"factor"}},
-		{"factor", []grammarSymbol{"number"}},
-		{"factor", []grammarSymbol{"(", "expr", ")"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "term"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"term"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"term", "*", "factor"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"factor"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"(", "expr", ")"}, SemanticRule{"", "", []int{}}},
 	}
 
 	// The production order is jumbled up in some tests to test equality.
@@ -439,9 +439,9 @@ func TestComputeLrItemClosureSet(t *testing.T) {
 func TestComputeLrItemSetNext(t *testing.T) {
 	var g Grammar
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "number"}},
-		{"expr", []grammarSymbol{"number"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "number"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {

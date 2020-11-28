@@ -3,6 +3,8 @@ package parser
 import (
 	"reflect"
 	"testing"
+
+	"github.com/SaurabhJha/lexpar/lexer"
 )
 
 func TestGetFirstBody(t *testing.T) {
@@ -10,9 +12,9 @@ func TestGetFirstBody(t *testing.T) {
 		p    Production
 		want grammarSymbol
 	}{
-		{Production{"expr", []grammarSymbol{"expr", "+", "term"}}, "expr"},
-		{Production{"term", []grammarSymbol{"factor"}}, "factor"},
-		{Production{"expr'", []grammarSymbol{}}, ""},
+		{Production{"expr", []grammarSymbol{"expr", "+", "term"}, SemanticRule{"", "", []int{}}}, "expr"},
+		{Production{"term", []grammarSymbol{"factor"}, SemanticRule{"", "", []int{}}}, "factor"},
+		{Production{"expr'", []grammarSymbol{}, SemanticRule{"", "", []int{}}}, ""},
 	}
 
 	for _, test := range testData {
@@ -26,13 +28,13 @@ func TestGetProductionsOfSymbol(t *testing.T) {
 	var g Grammar
 	g.Start = "expr'"
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "term"}},
-		{"expr", []grammarSymbol{"term"}},
-		{"term", []grammarSymbol{"term", "*", "factor"}},
-		{"term", []grammarSymbol{"factor"}},
-		{"factor", []grammarSymbol{"number"}},
-		{"factor", []grammarSymbol{"(", "expr", ")"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "term"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"term"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"term", "*", "factor"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"factor"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"(", "expr", ")"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -64,13 +66,13 @@ func TestComputeFirstSet(t *testing.T) {
 	var g Grammar
 	g.Start = "expr'"
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "term"}},
-		{"expr", []grammarSymbol{"term"}},
-		{"term", []grammarSymbol{"term", "*", "factor"}},
-		{"term", []grammarSymbol{"factor"}},
-		{"factor", []grammarSymbol{"number"}},
-		{"factor", []grammarSymbol{"(", "expr", ")"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "term"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"term"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"term", "*", "factor"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"factor"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"(", "expr", ")"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -94,13 +96,13 @@ func TestComputeFollowSet(t *testing.T) {
 	var g Grammar
 	g.Start = "expr'"
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "term"}},
-		{"expr", []grammarSymbol{"term"}},
-		{"term", []grammarSymbol{"term", "*", "factor"}},
-		{"term", []grammarSymbol{"factor"}},
-		{"factor", []grammarSymbol{"number"}},
-		{"factor", []grammarSymbol{"(", "expr", ")"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "term"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"term"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"term", "*", "factor"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"factor"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"(", "expr", ")"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
@@ -123,23 +125,23 @@ func TestGetProductionNumber(t *testing.T) {
 	var g Grammar
 	g.Start = "expr'"
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "term"}},
-		{"expr", []grammarSymbol{"term"}},
-		{"term", []grammarSymbol{"term", "*", "factor"}},
-		{"term", []grammarSymbol{"factor"}},
-		{"factor", []grammarSymbol{"number"}},
-		{"factor", []grammarSymbol{"(", "expr", ")"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"expr", "+", "term"}, SemanticRule{"", "", []int{}}},
+		{"expr", []grammarSymbol{"term"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"term", "*", "factor"}, SemanticRule{"", "", []int{}}},
+		{"term", []grammarSymbol{"factor"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
+		{"factor", []grammarSymbol{"(", "expr", ")"}, SemanticRule{"", "", []int{}}},
 	}
 
 	var testData = []struct {
 		input    Production
 		expected int
 	}{
-		{Production{"expr", []grammarSymbol{"expr", "+", "term"}}, 1},
-		{Production{"term", []grammarSymbol{"term", "*", "factor"}}, 3},
-		{Production{"factor", []grammarSymbol{"number"}}, 5},
-		{Production{"expr", []grammarSymbol{"factor"}}, -1},
+		{Production{"expr", []grammarSymbol{"expr", "+", "term"}, SemanticRule{"", "", []int{}}}, 1},
+		{Production{"term", []grammarSymbol{"term", "*", "factor"}, SemanticRule{"", "", []int{}}}, 3},
+		{Production{"factor", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}}, 5},
+		{Production{"expr", []grammarSymbol{"factor"}, SemanticRule{"", "", []int{}}}, -1},
 	}
 
 	for _, test := range testData {
@@ -153,25 +155,94 @@ func TestCompile(t *testing.T) {
 	var g Grammar
 	g.Start = "expr'"
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}},
-		{"expr", []grammarSymbol{"expr", "+", "term"}},
-		{"expr", []grammarSymbol{"term"}},
-		{"term", []grammarSymbol{"term", "*", "factor"}},
-		{"term", []grammarSymbol{"factor"}},
-		{"factor", []grammarSymbol{"number"}},
-		{"factor", []grammarSymbol{"(", "expr", ")"}},
+		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", nil}},
+		{"expr", []grammarSymbol{"expr", "+", "term"}, SemanticRule{"tree", "+", []int{0, 2}}},
+		{"expr", []grammarSymbol{"term"}, SemanticRule{"", "", nil}},
+		{"term", []grammarSymbol{"term", "*", "factor"}, SemanticRule{"tree", "*", []int{0, 2}}},
+		{"term", []grammarSymbol{"factor"}, SemanticRule{"", "", nil}},
+		{"factor", []grammarSymbol{"number"}, SemanticRule{"", "", nil}},
+		{"factor", []grammarSymbol{"(", "expr", ")"}, SemanticRule{"copy", "", []int{1}}},
 	}
 
 	var testData = []struct {
-		input    []grammarSymbol
+		input    []lexer.Token
 		expected bool
 	}{
-		{[]grammarSymbol{"number", "+", "number", "$"}, true},
-		{[]grammarSymbol{"number", "+", "number", "*", "number", "$"}, true},
-		{[]grammarSymbol{"(", "number", "+", "number", "*", "number", "$"}, false},
-		{[]grammarSymbol{"(", "number", "+", "number", "*", "number", ")", "$"}, true},
-		{[]grammarSymbol{"(", "number", "+", "number", ")", "*", "number", ")", "$"}, false},
-		{[]grammarSymbol{"(", "number", "+", "number", ")", "*", "(", "number", "*", "number", ")", "$"}, true},
+		{
+			[]lexer.Token{
+				{TokenType: "number", Lexeme: "12"},
+				{TokenType: "+", Lexeme: "+"},
+				{TokenType: "number", Lexeme: "8"},
+				{TokenType: "*", Lexeme: "*"},
+				{TokenType: "number", Lexeme: "75"},
+				{TokenType: "$", Lexeme: "$"},
+			},
+			true,
+		},
+		{
+			[]lexer.Token{
+				{TokenType: "number", Lexeme: "12"},
+				{TokenType: "+", Lexeme: "+"},
+				{TokenType: "number", Lexeme: "8"},
+				{TokenType: "*", Lexeme: "*"},
+				{TokenType: "number", Lexeme: "75"},
+			},
+			false,
+		},
+		{
+			[]lexer.Token{
+				{TokenType: "(", Lexeme: "("},
+				{TokenType: "number", Lexeme: "12"},
+				{TokenType: "+", Lexeme: "+"},
+				{TokenType: "number", Lexeme: "8"},
+				{TokenType: "*", Lexeme: "*"},
+				{TokenType: "number", Lexeme: "75"},
+				{TokenType: "$", Lexeme: "$"},
+			},
+			false,
+		},
+		{
+			[]lexer.Token{
+				{TokenType: "(", Lexeme: "("},
+				{TokenType: "number", Lexeme: "12"},
+				{TokenType: "+", Lexeme: "+"},
+				{TokenType: "number", Lexeme: "8"},
+				{TokenType: "*", Lexeme: "*"},
+				{TokenType: "number", Lexeme: "75"},
+				{TokenType: ")", Lexeme: ")"},
+				{TokenType: "$", Lexeme: "$"},
+			},
+			true,
+		},
+		{
+			[]lexer.Token{
+				{TokenType: "(", Lexeme: "("},
+				{TokenType: "number", Lexeme: "12"},
+				{TokenType: "+", Lexeme: "+"},
+				{TokenType: "number", Lexeme: "8"},
+				{TokenType: ")", Lexeme: ")"},
+				{TokenType: "*", Lexeme: "*"},
+				{TokenType: "number", Lexeme: "75"},
+				{TokenType: ")", Lexeme: ")"},
+				{TokenType: "$", Lexeme: "$"},
+			},
+			false,
+		},
+		{
+			[]lexer.Token{
+				{TokenType: "(", Lexeme: "("},
+				{TokenType: "number", Lexeme: "12"},
+				{TokenType: "+", Lexeme: "+"},
+				{TokenType: "number", Lexeme: "8"},
+				{TokenType: ")", Lexeme: ")"},
+				{TokenType: "*", Lexeme: "*"},
+				{TokenType: "number", Lexeme: "75"},
+				{TokenType: "*", Lexeme: "*"},
+				{TokenType: "number", Lexeme: "75"},
+				{TokenType: "$", Lexeme: "$"},
+			},
+			true,
+		},
 	}
 
 	for _, test := range testData {

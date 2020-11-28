@@ -1,6 +1,8 @@
 package parser
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type setOfSymbols map[grammarSymbol]bool
 
@@ -102,4 +104,40 @@ func (ss *parserStack) pop() state {
 
 func (ss *parserStack) empty() bool {
 	return len(*ss) == 0
+}
+
+// SyntaxGraph is a data structure representation of a program text. It is produced by
+// Parser.
+type SyntaxGraph struct {
+	Graph     map[int][]int
+	NodeLabel []string
+	Root      int
+}
+
+func (ast *SyntaxGraph) createNewNode(lexeme string) int {
+	ast.NodeLabel = append(ast.NodeLabel, lexeme)
+	return len(ast.NodeLabel) - 1
+}
+
+func (ast *SyntaxGraph) addEdge(start int, end int) {
+	if ast.Graph == nil {
+		ast.Graph = make(map[int][]int)
+	}
+	ast.Graph[start] = append(ast.Graph[start], end)
+}
+
+type graphStack []int
+
+func (gs *graphStack) push(n int) {
+	(*gs) = append(*gs, n)
+}
+
+func (gs *graphStack) pop() int {
+	top := gs.top()
+	*gs = (*gs)[:len(*gs)-1]
+	return top
+}
+
+func (gs *graphStack) top() int {
+	return (*gs)[len(*gs)-1]
 }
