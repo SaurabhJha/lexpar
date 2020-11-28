@@ -7,7 +7,7 @@ and returns a directed acyclic graph (DAG) representation of it.
 
 The regular expressions and the grammar are specified using a JSON file. As an overview to the process, let's
 write an example configuration. Later, we will cover the details of notation to write regular expressions,
-grammar and syntax directed definitions.
+grammar, and syntax directed definitions.
 
 ## Example: Positive integer addition
 Suppose we want to parse strings that depict addition of positive integers. Some examples are:
