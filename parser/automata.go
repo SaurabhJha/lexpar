@@ -8,9 +8,10 @@ import (
 )
 
 type lrItem struct {
-	g   Grammar
-	p   Production
-	pos int
+	g         Grammar
+	p         Production
+	pos       int
+	followSet map[grammarSymbol]bool
 }
 
 func (l lrItem) getNextSymbol() grammarSymbol {
@@ -20,6 +21,13 @@ func (l lrItem) getNextSymbol() grammarSymbol {
 	return l.p.Body[l.pos]
 }
 
+func (l lrItem) getNextToNextSymbol() grammarSymbol {
+	if l.pos >= len(l.p.Body)-1 {
+		return ""
+	}
+	return l.p.Body[l.pos+1]
+}
+
 func (l lrItem) getNextItem(s grammarSymbol) lrItem {
 	if l.pos >= len(l.p.Body) {
 		return lrItem{}
@@ -27,7 +35,7 @@ func (l lrItem) getNextItem(s grammarSymbol) lrItem {
 	if l.p.Body[l.pos] != s {
 		return lrItem{}
 	}
-	return lrItem{l.g, l.p, l.pos + 1}
+	return lrItem{l.g, l.p, l.pos + 1, l.followSet}
 }
 
 func (l lrItem) empty() bool {
@@ -36,6 +44,7 @@ func (l lrItem) empty() bool {
 			Grammar{nil, ""},
 			Production{"", nil, SemanticRule{"", "", nil}},
 			0,
+			nil,
 		},
 	)
 }
@@ -104,22 +113,26 @@ func (l lrItem) computeClosureSet() lrItemSet {
 
 	q := make(queueOfItems, 0, 10)
 	q.enqueue(l)
-	seenNonTerminals := make(setOfSymbols)
 	for !q.empty() {
 		currentItem := q.dequeue()
 		nextSymbol := currentItem.getNextSymbol()
-		if !l.g.isTerminal(nextSymbol) && !seenNonTerminals.has(nextSymbol) {
+		if !l.g.isTerminal(nextSymbol) {
 			// We have not encountered this non terminal before. Add its productions to the item set
 			// and to the queue. We add them to queue so that items reachable from those can be added
 			// later.
+			followSetOfNextItem := make(map[grammarSymbol]bool)
+			if nextToNextSymbol := currentItem.getNextToNextSymbol(); nextToNextSymbol != "" {
+				followSetOfNextItem = currentItem.g.computeFirstSet(nextToNextSymbol)
+			} else {
+				followSetOfNextItem = currentItem.followSet
+			}
 			for _, p := range l.g.getProductionsOfSymbol(nextSymbol) {
-				nextItem := lrItem{l.g, p, 0}
+				nextItem := lrItem{l.g, p, 0, followSetOfNextItem}
 				if !ls.has(nextItem) {
 					q.enqueue(nextItem)
 					ls.add(nextItem)
 				}
 			}
-			seenNonTerminals.add(nextSymbol)
 		}
 	}
 

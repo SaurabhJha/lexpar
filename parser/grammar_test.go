@@ -245,12 +245,25 @@ func TestCompile(t *testing.T) {
 		},
 	}
 
+	ps := g.compile()
 	for _, test := range testData {
-		ps := g.compile()
 		ps.parse(test.input)
 		if ps.accepted != test.expected {
 			t.Errorf("Expected parser to output %v on input %v, got %v",
 				test.expected, test.input, ps.accepted)
 		}
+		ps.reset()
 	}
+}
+
+func TestCompile1(t *testing.T) {
+	var g Grammar
+	g.Start = "S'"
+	g.Productions = []Production{
+		{"S'", []grammarSymbol{"S"}, SemanticRule{}},
+		{"S", []grammarSymbol{"C", "C"}, SemanticRule{}},
+		{"C", []grammarSymbol{"c", "C"}, SemanticRule{}},
+		{"C", []grammarSymbol{"d"}, SemanticRule{}},
+	}
+	g.compile() // It compiles without any conflicts
 }

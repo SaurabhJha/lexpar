@@ -117,7 +117,7 @@ func (g Grammar) getProductionNumber(p Production) int {
 func (g Grammar) compile() parser {
 	table := make(parsingTable)
 	startProduction := g.getProductionsOfSymbol(g.Start)[0]
-	startItem := lrItem{g, startProduction, 0}
+	startItem := lrItem{g, startProduction, 0, map[grammarSymbol]bool{"$": true}}
 	startItemSet := startItem.computeClosureSet()
 	q := make(queueOfItemSets, 0, 10)
 	q.enqueue(startItemSet)
@@ -143,7 +143,7 @@ func (g Grammar) compile() parser {
 		for _, item := range currentItemSet.itemSet {
 			if item.getNextSymbol() == "" {
 				productionNumber := item.g.getProductionNumber(item.p)
-				for symbol := range item.g.computeFollowSet(item.p.Head) {
+				for symbol := range item.followSet {
 					if productionNumber == 0 && symbol == "$" {
 						table.addAcceptMove(currentState)
 					} else {

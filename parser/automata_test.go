@@ -17,9 +17,9 @@ func TestLrItemNextSymbol(t *testing.T) {
 		item     lrItem
 		expected grammarSymbol
 	}{
-		{lrItem{g, g.Productions[0], 1}, ""},
-		{lrItem{g, g.Productions[1], 1}, "+"},
-		{lrItem{g, g.Productions[2], 0}, "number"},
+		{lrItem{g, g.Productions[0], 1, nil}, ""},
+		{lrItem{g, g.Productions[1], 1, nil}, "+"},
+		{lrItem{g, g.Productions[2], 0, nil}, "number"},
 	}
 
 	for _, test := range testData {
@@ -42,9 +42,9 @@ func TestLrItemGetNextItem(t *testing.T) {
 		inputSymbol grammarSymbol
 		expected    lrItem
 	}{
-		{lrItem{g, g.Productions[1], 0}, "expr", lrItem{g, g.Productions[1], 1}},
-		{lrItem{g, g.Productions[2], 0}, "number", lrItem{g, g.Productions[2], 1}},
-		{lrItem{g, g.Productions[2], 0}, "expr", lrItem{}},
+		{lrItem{g, g.Productions[1], 0, nil}, "expr", lrItem{g, g.Productions[1], 1, nil}},
+		{lrItem{g, g.Productions[2], 0, nil}, "number", lrItem{g, g.Productions[2], 1, nil}},
+		{lrItem{g, g.Productions[2], 0, nil}, "expr", lrItem{}},
 	}
 
 	for _, test := range testData {
@@ -66,7 +66,7 @@ func TestLrItemEmpty(t *testing.T) {
 		inputItem lrItem
 		expected  bool
 	}{
-		{lrItem{g, g.Productions[2], 1}, false},
+		{lrItem{g, g.Productions[2], 1, nil}, false},
 		{lrItem{}, true},
 	}
 
@@ -93,45 +93,45 @@ func TestLrItemSetHas(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[1], 0},
-					{g, g.Productions[2], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[1], 0, nil},
+					{g, g.Productions[2], 0, nil},
 				},
 			},
-			lrItem{g, g.Productions[1], 0},
+			lrItem{g, g.Productions[1], 0, nil},
 			true,
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 1},
-					{g, g.Productions[1], 0},
-					{g, g.Productions[2], 2},
+					{g, g.Productions[0], 1, nil},
+					{g, g.Productions[1], 0, nil},
+					{g, g.Productions[2], 2, nil},
 				},
 			},
-			lrItem{g, g.Productions[2], 2},
+			lrItem{g, g.Productions[2], 2, nil},
 			true,
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 1},
-					{g, g.Productions[1], 0},
-					{g, g.Productions[2], 2},
+					{g, g.Productions[0], 1, nil},
+					{g, g.Productions[1], 0, nil},
+					{g, g.Productions[2], 2, nil},
 				},
 			},
-			lrItem{g, g.Productions[1], 0},
+			lrItem{g, g.Productions[1], 0, nil},
 			true,
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 1},
-					{g, g.Productions[1], 0},
-					{g, g.Productions[2], 2},
+					{g, g.Productions[0], 1, nil},
+					{g, g.Productions[1], 0, nil},
+					{g, g.Productions[2], 2, nil},
 				},
 			},
-			lrItem{g, g.Productions[1], 1},
+			lrItem{g, g.Productions[1], 1, nil},
 			false,
 		},
 	}
@@ -159,14 +159,14 @@ func TestLrItemSetEquals(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[2], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[2], 0, nil},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[2], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[2], 0, nil},
 				},
 			},
 			true,
@@ -174,14 +174,14 @@ func TestLrItemSetEquals(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[2], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[2], 0, nil},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[1], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[1], 0, nil},
 				},
 			},
 			false,
@@ -189,16 +189,16 @@ func TestLrItemSetEquals(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[1], 0},
-					{g, g.Productions[2], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[1], 0, nil},
+					{g, g.Productions[2], 0, nil},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[2], 0},
-					{g, g.Productions[1], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[2], 0, nil},
+					{g, g.Productions[1], 0, nil},
 				},
 			},
 			true,
@@ -228,33 +228,33 @@ func TestLrItemSetAdd(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[2], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[2], 0, nil},
 				},
 			},
-			lrItem{g, g.Productions[1], 0},
+			lrItem{g, g.Productions[1], 0, nil},
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[2], 0},
-					{g, g.Productions[1], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[2], 0, nil},
+					{g, g.Productions[1], 0, nil},
 				},
 			},
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[1], 0},
-					{g, g.Productions[2], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[1], 0, nil},
+					{g, g.Productions[2], 0, nil},
 				},
 			},
-			lrItem{g, g.Productions[1], 0},
+			lrItem{g, g.Productions[1], 0, nil},
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[2], 0},
-					{g, g.Productions[1], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[2], 0, nil},
+					{g, g.Productions[1], 0, nil},
 				},
 			},
 		},
@@ -282,8 +282,8 @@ func TestComputeLrItemSetNextSymbols(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 1},
-					{g, g.Productions[2], 1},
+					{g, g.Productions[0], 1, nil},
+					{g, g.Productions[2], 1, nil},
 				},
 			},
 			setOfSymbols{},
@@ -291,9 +291,9 @@ func TestComputeLrItemSetNextSymbols(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[1], 0},
-					{g, g.Productions[2], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[1], 0, nil},
+					{g, g.Productions[2], 0, nil},
 				},
 			},
 			setOfSymbols{"expr": true, "number": true},
@@ -323,21 +323,21 @@ func TestComputeLrItemSetMergeWith(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 1},
-					{g, g.Productions[2], 1},
+					{g, g.Productions[0], 1, nil},
+					{g, g.Productions[2], 1, nil},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[2], 1},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[2], 1, nil},
 				},
 			},
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[0], 1},
-					{g, g.Productions[2], 1},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[0], 1, nil},
+					{g, g.Productions[2], 1, nil},
 				},
 			},
 		},
@@ -352,15 +352,12 @@ func TestComputeLrItemSetMergeWith(t *testing.T) {
 
 func TestComputeLrItemClosureSet(t *testing.T) {
 	var g Grammar
-	g.Start = "expr'"
+	g.Start = "S'"
 	g.Productions = []Production{
-		{"expr'", []grammarSymbol{"expr"}, SemanticRule{"", "", []int{}}},
-		{"expr", []grammarSymbol{"expr", "+", "term"}, SemanticRule{"", "", []int{}}},
-		{"expr", []grammarSymbol{"term"}, SemanticRule{"", "", []int{}}},
-		{"term", []grammarSymbol{"term", "*", "factor"}, SemanticRule{"", "", []int{}}},
-		{"term", []grammarSymbol{"factor"}, SemanticRule{"", "", []int{}}},
-		{"factor", []grammarSymbol{"number"}, SemanticRule{"", "", []int{}}},
-		{"factor", []grammarSymbol{"(", "expr", ")"}, SemanticRule{"", "", []int{}}},
+		{"S'", []grammarSymbol{"S"}, SemanticRule{}},
+		{"S", []grammarSymbol{"C", "C"}, SemanticRule{}},
+		{"C", []grammarSymbol{"c", "C"}, SemanticRule{}},
+		{"C", []grammarSymbol{"d"}, SemanticRule{}},
 	}
 
 	// The production order is jumbled up in some tests to test equality.
@@ -369,61 +366,31 @@ func TestComputeLrItemClosureSet(t *testing.T) {
 		expected lrItemSet
 	}{
 		{
-			lrItem{g, g.Productions[0], 0},
+			lrItem{g, g.Productions[0], 0, map[grammarSymbol]bool{"$": true}},
 			lrItemSet{
 				itemSet: []lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[1], 0},
-					{g, g.Productions[2], 0},
-					{g, g.Productions[4], 0},
-					{g, g.Productions[3], 0},
-					{g, g.Productions[6], 0},
-					{g, g.Productions[5], 0},
+					{g, g.Productions[0], 0, map[grammarSymbol]bool{"$": true}},
+					{g, g.Productions[1], 0, map[grammarSymbol]bool{"$": true}},
+					{g, g.Productions[2], 0, map[grammarSymbol]bool{"c": true, "d": true}},
+					{g, g.Productions[3], 0, map[grammarSymbol]bool{"c": true, "d": true}},
 				},
 			},
 		},
 		{
-			lrItem{g, g.Productions[3], 0},
+			lrItem{g, g.Productions[3], 1, map[grammarSymbol]bool{"c": true, "d": true}},
 			lrItemSet{
 				itemSet: []lrItem{
-					{g, g.Productions[6], 0},
-					{g, g.Productions[4], 0},
-					{g, g.Productions[5], 0},
-					{g, g.Productions[3], 0},
+					{g, g.Productions[3], 1, map[grammarSymbol]bool{"c": true, "d": true}},
 				},
 			},
 		},
 		{
-			lrItem{g, g.Productions[4], 0},
+			lrItem{g, g.Productions[1], 1, map[grammarSymbol]bool{"c": true, "d": true}},
 			lrItemSet{
 				itemSet: []lrItem{
-					{g, g.Productions[4], 0},
-					{g, g.Productions[6], 0},
-					{g, g.Productions[5], 0},
-				},
-			},
-		},
-		{
-			lrItem{g, g.Productions[1], 1},
-			lrItemSet{
-				itemSet: []lrItem{
-					{g, g.Productions[1], 1},
-				},
-			},
-		},
-		{
-			lrItem{g, g.Productions[3], 1},
-			lrItemSet{
-				itemSet: []lrItem{
-					{g, g.Productions[3], 1},
-				},
-			},
-		},
-		{
-			lrItem{g, g.Productions[3], 3},
-			lrItemSet{
-				itemSet: []lrItem{
-					{g, g.Productions[3], 3},
+					{g, g.Productions[1], 1, map[grammarSymbol]bool{"c": true, "d": true}},
+					{g, g.Productions[2], 0, map[grammarSymbol]bool{"c": true, "d": true}},
+					{g, g.Productions[3], 0, map[grammarSymbol]bool{"c": true, "d": true}},
 				},
 			},
 		},
@@ -452,23 +419,23 @@ func TestComputeLrItemSetNext(t *testing.T) {
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 0},
-					{g, g.Productions[1], 0},
-					{g, g.Productions[2], 0},
+					{g, g.Productions[0], 0, nil},
+					{g, g.Productions[1], 0, nil},
+					{g, g.Productions[2], 0, nil},
 				},
 			},
 			"expr",
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[0], 1},
-					{g, g.Productions[1], 1},
+					{g, g.Productions[0], 1, nil},
+					{g, g.Productions[1], 1, nil},
 				},
 			},
 		},
 		{
 			lrItemSet{
 				[]lrItem{
-					{g, g.Productions[1], 1},
+					{g, g.Productions[1], 1, nil},
 				},
 			},
 			"expr",
