@@ -5,6 +5,10 @@ and returns a directed acyclic graph (DAG) representation of it.
 
 ![alt compiler-frontend-illustration](img/compiler_frontend.png)
 
+This parser can recognise canonical LR(1) grammars which is the largest set of grammars for which bottom-up parsers
+can be built. In contrast, yacc recognises LALR(1) grammar which is more restrictive than canonical LR(1). Yacc was written at a time when computers had limited memory. With new and faster computers, there
+is no reason we cannot take advantage of canonical LR(1) grammars.
+
 The regular expressions and the grammar are specified using a JSON file. As an overview to the process, let's
 write an example configuration. Later, we will cover the details of notation to write regular expressions,
 grammar, and syntax directed definitions.
