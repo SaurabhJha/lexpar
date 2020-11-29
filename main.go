@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/SaurabhJha/lexpar/io"
 	"github.com/SaurabhJha/lexpar/lexer"
@@ -20,18 +21,24 @@ func main() {
 
 	var pars parser.Parser
 	pars.Init(definitions.Grammar)
-	text := "12+123*4"
-
-	tokens := tok.Tokenize(text)
-	tree := pars.Parse(tokens)
-	fmt.Println(tree)
-	tok.Reset()
-	// for {
-	// 	text := io.ReadFromStdin()
-	// 	tokens := tok.Tokenize(text)
-	// 	tree := pars.Parse(tokens)
-	// 	fmt.Println(tree)
-	// 	tok.Reset()
-	// 	pars.Reset()
-	// }
+	for {
+		text := io.ReadFromStdin()
+		commandType := io.GetCommandType(text)
+		switch commandType {
+		case "quit":
+			os.Exit(0)
+		case "setRegex":
+			io.ExecuteRegexCommand(text, &definitions)
+		case "persist":
+			io.Persist(&definitions)
+		case "print":
+			io.Print(&definitions)
+		default:
+			tokens := tok.Tokenize(text)
+			tree := pars.Parse(tokens)
+			fmt.Println(tree)
+			tok.Reset()
+			pars.Reset()
+		}
+	}
 }

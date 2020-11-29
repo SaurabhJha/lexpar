@@ -1,66 +1,122 @@
 {
-    "regularExpressions": {
-        "number": "(1|2|3|4|5|6|7|8|9|0)(1|2|3|4|5|6|7|8|9|0)*",
-        "id": "(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|1|2|3|4|5|6|7|8|9|0)*",
-        "+": "+",
-        "-": "-",
-        "*": "/*",
-        "/": "//",
-        "=": "=",
-        "==": "==",
-        "whitespace": "( )*",
-        "(": "/(",
-        ")": "/)"
-    },
-    "grammar": {
-        "start": "expr'",
-        "productions": [
-            {
-                "head": "expr'",
-                "body": ["expr"]
-            },
-            {
-                "head": "expr",
-                "body": ["expr", "+", "term"],
-                "rule": {
-                    "type": "tree",
-                    "rootLabel": "+",
-                    "children": [0, 2]
-                }
-            },
-            {
-                "head": "expr",
-                "body": ["term"]
-            },
-            {
-                "head": "term",
-                "body": ["term", "*", "factor"],
-                "rule": {
-                    "type": "tree",
-                    "rootLabel": "*",
-                    "children": [0, 2]
-                }
-            },
-            {
-                "head": "term",
-                "body": ["factor"]
-            },
-            {
-                "head": "factor",
-                "body": ["number"]
-            },
-            {
-                "head": "factor",
-                "body": ["id"]
-            },
-            {
-                "head": "factor",
-                "body": ["(", "expr", ")"],
-                "rule": {
-                    "type": "copy",
-                    "children": [1]                    
-                }
-            }
-        ]
-    }
+	"regularExpressions": {
+		"(": "/(",
+		")": "/)",
+		"*": "/*",
+		"+": "+",
+		"-": "-",
+		"/": "//",
+		"=": "=",
+		"==": "==",
+		"id": "(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|1|2|3|4|5|6|7|8|9|0)*",
+		"number": "(1|2|3|4|5|6|7|8|9|0)(1|2|3|4|5|6|7|8|9|0)*",
+		"whitespace": "( )( )*"
+	},
+	"grammar": {
+		"Productions": [
+			{
+				"Head": "expr'",
+				"Body": [
+					"expr"
+				],
+				"Rule": {
+					"Type": "",
+					"RootLabel": "",
+					"Children": null
+				}
+			},
+			{
+				"Head": "expr",
+				"Body": [
+					"expr",
+					"+",
+					"term"
+				],
+				"Rule": {
+					"Type": "tree",
+					"RootLabel": "+",
+					"Children": [
+						0,
+						2
+					]
+				}
+			},
+			{
+				"Head": "expr",
+				"Body": [
+					"term"
+				],
+				"Rule": {
+					"Type": "",
+					"RootLabel": "",
+					"Children": null
+				}
+			},
+			{
+				"Head": "term",
+				"Body": [
+					"term",
+					"*",
+					"factor"
+				],
+				"Rule": {
+					"Type": "tree",
+					"RootLabel": "*",
+					"Children": [
+						0,
+						2
+					]
+				}
+			},
+			{
+				"Head": "term",
+				"Body": [
+					"factor"
+				],
+				"Rule": {
+					"Type": "",
+					"RootLabel": "",
+					"Children": null
+				}
+			},
+			{
+				"Head": "factor",
+				"Body": [
+					"number"
+				],
+				"Rule": {
+					"Type": "",
+					"RootLabel": "",
+					"Children": null
+				}
+			},
+			{
+				"Head": "factor",
+				"Body": [
+					"id"
+				],
+				"Rule": {
+					"Type": "",
+					"RootLabel": "",
+					"Children": null
+				}
+			},
+			{
+				"Head": "factor",
+				"Body": [
+					"(",
+					"expr",
+					")"
+				],
+				"Rule": {
+					"Type": "copy",
+					"RootLabel": "",
+					"Children": [
+						1
+					]
+				}
+			}
+		],
+		"Start": "expr'"
+	}
 }

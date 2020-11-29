@@ -1,6 +1,9 @@
 package lexer
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Token represents one "word" of a program text. A sequence of tokens are output by a tokenizer.
 type Token struct {
@@ -58,10 +61,15 @@ func (t *Tokenizer) getMaxMatchingPrefix(input string) (string, string) {
 
 // Tokenize returns an array of tokens given an input string.
 func (t *Tokenizer) Tokenize(input string) []Token {
+	cleanedInput := ""
+	for _, character := range input {
+		if character != ' ' {
+			cleanedInput = strings.Join([]string{cleanedInput, string(character)}, "")
+		}
+	}
+
 	tokens := make([]Token, 0, 100)
-
-	remainingInput := input
-
+	remainingInput := cleanedInput
 	for len(remainingInput) != 0 {
 		nextTokenType, nextLexeme := t.getMaxMatchingPrefix(remainingInput)
 		if len(nextLexeme) == 0 {
